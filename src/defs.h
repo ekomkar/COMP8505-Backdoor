@@ -16,9 +16,7 @@
 #define uint32 u_int32_t
 #define uint64 u_int64_t
 
-
-
-#define KEY 5001
+#define HDR_KEY 5001
 
 #define TRUE 1
 #define FALSE 0
@@ -30,8 +28,6 @@
 
 #define PKT_T_FLT "tcp port 80"
 #define PKT_U_FLT "udp port 53"
-
-#define IP_HDR_KEY "626f7373"
 
 #define FRAM_SZ 8
 #define MD5_LEN 4

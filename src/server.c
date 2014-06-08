@@ -125,6 +125,7 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	if(size_tcp < 20)
 		error("handle_tcp(): invalid TCP size");
 
+	// retrieves the TCP payload
 	tcp_payload = (char *)(packet + ip_len + size_tcp);
 }
 
@@ -144,6 +145,7 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	if (size_udp < 8)
 		error("handle_udp(): invalid UDP size");
 
+	// retrieves the UDP payload
 	udp_payload = (char *)(iphdr + ip_len + size_udp);
 }
 

@@ -15,7 +15,7 @@
 
 int closing;
 int channel;
-
+int ichanged;
 void backdoor_client(uint32 ipaddr, int chan)
 {
 	char command[MAX_LEN];

@@ -49,9 +49,45 @@ FILE* open_file(char* fname, uint8 writeMode) {
 }
 
 void encrypt(char *key, char *msg, int size) {
+	static char* result;
+	int n = 0;
+	DES_cblock key2;
+	DES_key_schedule schedule;
+
+	result = (char*) malloc(size);
+
+	// Prepare the key for use with DES_cfb64_encrypt
+	memcpy(key2, key, 8);
+	DES_set_odd_parity(&key2);
+	DES_set_key_checked(&key2, &schedule);
+
+	// Encryption occurs here
+	DES_cfb64_encrypt((unsigned char*) msg, (unsigned char*) result, size,
+			&schedule, &key2, &n, DES_ENCRYPT);
+	memcpy(msg, result, size);
+
+	free(result);
 }
 
 void decrypt(char *key, char *msg, int size) {
+	static char* result;
+	int n = 0;
+	DES_cblock key2;
+	DES_key_schedule schedule;
+
+	result = (char*) malloc(size);
+
+	// Prepare the key for use with DES_cfb64_encrypt
+	memcpy(key2, key, 8);
+	DES_set_odd_parity(&key2);
+	DES_set_key_checked(&key2, &schedule);
+
+	// Decryption occurs here
+	DES_cfb64_encrypt((unsigned char*) msg, (unsigned char*) result, size,
+			&schedule, &key2, &n, DES_DECRYPT);
+	memcpy(msg, result, size);
+
+	free(result);
 }
 
 char* buildTransmission(char *data, int *len, char type) {
@@ -67,8 +103,6 @@ char* getTransmission(char *packet, int *len, char *type) {
 	int pass_len;
 	int tot_len;
 	int data_len;
-
-
 
 	return data;
 }

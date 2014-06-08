@@ -17,6 +17,9 @@
 #define uint64 u_int64_t
 #define ticktock 0
 
+
+#define KEY 5001
+
 #define TRUE 1
 #define FALSE 0
 

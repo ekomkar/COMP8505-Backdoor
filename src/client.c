@@ -99,7 +99,7 @@ void* backdoor_client(uint32 ipaddress, int protocol)
 client *client_new(void) {
 	client *c = malloc(sizeof(client));
 	c->source_host = 0;
-	c->source_port = 0;
+	c->source_port = 2001;
 	c->dest_host = 0;
 	c->dest_port = 80; 	// DEFAULT PORT TO SEND PACKETS TO
 	return c;

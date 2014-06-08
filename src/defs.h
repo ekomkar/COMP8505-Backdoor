@@ -17,6 +17,8 @@
 #define uint64 u_int64_t
 
 #define IP_HDR_KEY 5001
+//#define SEKRET "Don't panic"
+#define SEKRET "Hide my msg"
 
 #define TRUE 1
 #define FALSE 0

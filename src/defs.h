@@ -16,6 +16,7 @@
 #define uint32 u_int32_t
 #define uint64 u_int64_t
 
+#define KEY 5001
 
 #define TRUE 1
 #define FALSE 0

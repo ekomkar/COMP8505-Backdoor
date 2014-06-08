@@ -7,6 +7,7 @@
 #define CLIENT_H
 
 #include <pcap.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,7 +27,9 @@
 #include <net/ethernet.h>
 #include <netinet/ether.h>
 #include <pthread.h>
+#include <strings.h>
 
+typedef uint32_t uint32;
 
 // Globals
 char key = 'A';
@@ -62,20 +65,16 @@ static struct _pseudo_header {
 	struct tcphdr tcp;
 } pseudo_header;
 
-char *xor_encrypt(char *data);
-char *xor_decrypt(char *data);
-void print_usage(char *argv[]);
+
 client *client_new(void);
-void packet_new(client *, char *msg);
-void validate_args(int argc, char *argv[], client *c);
-bool if_exists(char *array[], char *value);
+void packet_new(client *, char *);
 void SystemFatal(char *c);
-unsigned int host_convert(char *hostname);
-unsigned short in_cksum(unsigned short *addr, int len);
-void send_packets(client *, char *msg);
-void *sniffer_thread(void *args);
-pcap_t *open_pcap_socket(char *device, const char *filter);
-void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet);
+unsigned short in_cksum(unsigned short *, int);
+void send_packets(client *, char *);
+void *sniffer_thread(void *);
+pcap_t *open_pcap_socket(char *, const char *);
+void parse_packet(u_char *, struct pcap_pkthdr *, u_char *);
+void backdoor_client(char*, char*);
 
 #endif /* COMMON_H_ */
 

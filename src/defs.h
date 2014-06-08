@@ -15,7 +15,7 @@
 #define uint16 u_int16_t
 #define uint32 u_int32_t
 #define uint64 u_int64_t
-#define monkey 1
+
 
 #define TRUE 1
 #define FALSE 0

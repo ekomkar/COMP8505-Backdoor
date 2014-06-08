@@ -29,7 +29,12 @@
 #include <pthread.h>
 #include <strings.h>
 
+<<<<<<< HEAD
 typedef uint32_t uint32;
+=======
+#include "defs.h"
+
+>>>>>>> a5b4cdb85c7bd3d9bf51dee8cb922a0f02a6c340
 
 // Globals
 char key = 'A';
@@ -65,7 +70,14 @@ static struct _pseudo_header {
 	struct tcphdr tcp;
 } pseudo_header;
 
+<<<<<<< HEAD
 
+=======
+void *backdoor_client(uint32 ipaddress, int protocol)
+char *xor_encrypt(char *data);
+char *xor_decrypt(char *data);
+void print_usage(char *argv[]);
+>>>>>>> a5b4cdb85c7bd3d9bf51dee8cb922a0f02a6c340
 client *client_new(void);
 void packet_new(client *, char *);
 void SystemFatal(char *c);

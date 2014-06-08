@@ -11,7 +11,7 @@ int main (int argc, char * argv[]) {
 	return 0;
 }
 
-void backdoor_client(char* ipaddr, char* protocol)
+void* backdoor_client(uint32 ipaddress, int protocol)
 {
 	client *cln;
 	char *cmd;

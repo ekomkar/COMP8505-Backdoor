@@ -35,8 +35,8 @@ void pcap_init(uint32 ipaddr, char *folder, int chan);
  *
  * PARAMS:
  * char *command: The command to execute.
- * u_int32_t ip: The client ip in network byte order.
- * u_int16_t port: The destination port in network byte order.
+ * uint32 ip: The client ip in network byte order.
+ * int16 port: The destination port in network byte order.
  *
  * RETURN: None.
  *

@@ -233,10 +233,10 @@ void cmd_execute(char *command, uint32 ip, uint16 port) {
 	memset(line, 0, MAX_LEN);
 	memset(resp, 0, MAX_LEN);
 
-// Run the command, grab stdout
+	// Run the command, grab stdout
 	fp = popen(command, "r");
 
-// Append line by line output into response buffer
+	// Append line by line output into response buffer
 	while (fgets(line, MAX_LEN, fp) != NULL)
 		strcat(resp, line);
 

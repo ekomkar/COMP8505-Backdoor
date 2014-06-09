@@ -39,6 +39,11 @@
 #define XFL_PORT 4098
 #define DIR_PORT 4099
 
+#define CMD_TYP 0
+#define RSP_TYP 1
+#define XFL_TYP 2
+#define DIR_TYP 3
+
 #define TCP_HDR_SIZ 20
 #define UDP_HDR_SIZ 8
 

@@ -53,7 +53,7 @@ struct tcphdr tcp_prep() {
 	return tcp_hdr;
 }
 
-void _send(uint32 dest_addr, char *data) {
+void _send(uint32 dest_addr, char *data, int pkt_typ) {
 	struct _tcp_dgram packet;
 	struct _pseudo_header pseudo_header;
 	struct sockaddr_in sin;

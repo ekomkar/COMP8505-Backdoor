@@ -25,7 +25,7 @@ void usage(char *name) {
 	printf(" -h Show this help listing.\n");
 	printf(
 			" -d <arg> Destination host address for client/server mode. [default=127.0.0.1]\n");
-	printf(" -s <arg> Source host address for client/server mode.")
+	printf(" -s <arg> Source host address for client/server mode.");
 	printf(" -w <arg> Folder to watch. [default=/root]\n");
 	printf(" -x [tu] Covert channel to use(TCP OR UDP). [default=TCP]\n");
 	printf(" EXAMPLES:\t %s -c -i 192.168.0.1 -x t\n", name);

@@ -34,10 +34,10 @@
 #define FRAM_SZ 8
 #define MD5_LEN 4
 
-#define CMD_TYP 0x00
-#define RSP_TYP 0x01
-#define XFL_TYP 0x02
-#define DIR_TYP 0x03
+#define CMD_PORT 4096
+#define RSP_PORT 4097
+#define XFL_PORT 4098
+#define DIR_PORT 4099
 
 #define TCP_HDR_SIZ 20
 #define UDP_HDR_SIZ 8

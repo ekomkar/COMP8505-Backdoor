@@ -103,4 +103,6 @@ void decrypt(char *key, char *msg, int size);
  */
 //char* getTransmission(char *packet, int *len, char *type);
 
+
+
 #endif /* UTIL_H_ */

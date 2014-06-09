@@ -60,6 +60,11 @@ void backdoor_client(uint32 ipaddress, char* protocol)
 
 	}
 
+	char * addr;
+	inaddr.s_addr = (unsigned long)srcip;
+	addr = inet_ntoa(inaddr);
+	printf("sock addr IP: %s \n", addr);
+
 	cln = client_new(); 			// create and initialize a new client struct
 
 	// set client structure

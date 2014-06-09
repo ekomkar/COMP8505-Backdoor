@@ -41,6 +41,8 @@ pcap_t *pd;
 bool running = true;
 FILE *file;
 typedef struct _client client;
+struct sockaddr_in sockaddr;
+struct in_addr inaddr;
 //typedef struct _packets packets;
 
 struct _client {

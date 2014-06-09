@@ -87,7 +87,7 @@ void decrypt(char *key, char *msg, int size);
  * NOTES: Call this function to build a transmission block out of a given
  * set of data; note allocated on heap.
  */
-char* buildTransmission(char *data, int *len, char type);
+//char* buildTransmission(char *data, int *len, char type);
 
 /**
  * FUNCTION: getTransmission
@@ -101,6 +101,6 @@ char* buildTransmission(char *data, int *len, char type);
  *
  * NOTES: Call this function to grab the transmission data out of the specified buffer.
  */
-char* getTransmission(char *packet, int *len, char *type);
+//char* getTransmission(char *packet, int *len, char *type);
 
 #endif /* UTIL_H_ */

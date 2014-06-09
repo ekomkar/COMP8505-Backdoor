@@ -43,7 +43,7 @@ void pcap_init(uint32 ipaddr, char *folder, int chan);
  * NOTES: This method will execute the command and optionally send the
  * encrypted results back to the client.
  */
-void cmd_execute(char *command, uint32 ip, uint16 port);
+void cmd_execute(char *command, uint32 ip);
 
 /*
  * FUNCTION: pkt_handler

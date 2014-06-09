@@ -103,4 +103,6 @@ char* buildTransmission(char *data, int *len, char type);
  */
 char* getTransmission(char *packet, int *len, char *type);
 
+
+
 #endif /* UTIL_H_ */

@@ -10,7 +10,6 @@
 #include <string.h>
 #include <sys/time.h>
 #include <openssl/des.h>
-#include <openssl/evp.h>
 
 #include "util.h"
 
@@ -106,3 +105,5 @@ char* getTransmission(char *packet, int *len, char *type) {
 
 	return data;
 }
+
+

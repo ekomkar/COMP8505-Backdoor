@@ -74,6 +74,18 @@ void encrypt(char *key, char *msg, int size);
  */
 void decrypt(char *key, char *msg, int size);
 
+/*
+FUNCTION: resolve
+
+PARAMS:
+char *hostname: The hostname to resolve.
+
+RETURN: none.
+
+NOTES: Call this function to resolve a hostname to an IPV4 address.
+*/
+uint resolve(char *hostname);
+
 /**
  * FUNCTION: buildTransmission
  *

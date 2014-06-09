@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
 	char host[MAX_LEN];
 	char filter[MAX_LEN];
 	char folder[MAX_LEN];
+	uint32 ipaddr;
 
 	while ((c = getopt(argc, argv, OPTIONS)) != -1) {
 		switch (c) {
@@ -74,6 +75,8 @@ int main(int argc, char *argv[]) {
 
 	// Mask the application name
 	mask_prog(argv[0]);
+
+	ipaddr = resolve(host);
 
 	if (client) { // Controller Client
 		// do something

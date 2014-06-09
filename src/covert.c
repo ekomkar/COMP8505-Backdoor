@@ -24,10 +24,22 @@
 #include <signal.h>
 #include <sys/types.h>
 
-
 #include "covert.h"
 #include "util.h"
 
+struct _tcp_dgram {
+	struct iphdr ip;
+	struct tcphdr tcp;
+};
+
+struct _pseudo_header {
+	unsigned int source_address;
+	unsigned int dest_address;
+	unsigned char placeholder;
+	unsigned char protocol;
+	unsigned short tcp_length;
+	struct tcphdr tcp;
+};
 
 struct iphdr ip_prep() {
 	struct iphdr ip_hdr;
@@ -42,6 +54,20 @@ struct tcphdr tcp_prep() {
 }
 
 void _send(uint32 dest_addr, char *data) {
+	struct _tcp_dgram packet;
+	struct _pseudo_header pseudo_header;
+	struct sockaddr_in sin;
+	int sock;
+	int one = 1;
 
+	srand(getpid() * getsec());
+
+	sock = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+	if (sock < 0)
+		error("_send(): Unable to open sending socket.");
+
+	// Tell kernel not to help us out
+	if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one)) < 0)
+		error("_send(): Kernel won't allow IP header override.");
 }
 

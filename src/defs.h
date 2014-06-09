@@ -26,7 +26,7 @@
 #define MAX_LEN 4096
 #define MASK "/usr/libex/brunner"
 
-#define OPTIONS ":cshi:f:w:x:"
+#define OPTIONS ":cbhs:d:f:w:x:"
 
 #define PKT_T_FLT "tcp port 80"
 #define PKT_U_FLT "udp port 53"
@@ -38,5 +38,8 @@
 #define RSP_TYP 0x01
 #define XFL_TYP 0x02
 #define DIR_TYP 0x03
+
+#define TCP_HDR_SIZ 20
+#define UDP_HDR_SIZ 8
 
 #endif /* DEFS_H_ */

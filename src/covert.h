@@ -18,18 +18,37 @@
 #define TTL 64
 
 /**
+ * ip_prep
+ *
+ * RETURN: iphdr structure
+ *
+ * NOTES:
  *
  */
 struct iphdr ip_prep();
 
 /**
+ * tpc_prep
+ *
+ * RETURN: tcphdr structure
+ *
+ * NOTES:
  *
  */
 struct tcphdr tcp_prep();
 
 /**
+ * _send
  *
+ * PARAMS:
+ * uint32 dest_addr:
+ * uint32 data:
+ * int chan:
+ *
+ * RETURN: none
+ *
+ * NOTES:
  */
-void _send(uint32 dest_addr, char *data);
+void _send(uint32 dest_addr, uint32 data, int chan);
 
 #endif /* COVERT_H_ */

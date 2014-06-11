@@ -14,7 +14,6 @@
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
-#include <netinet/udp.h>
 #include <netinet/if_ether.h>
 #include <net/ethernet.h>
 #include <netinet/ether.h>
@@ -29,32 +28,42 @@
 #include "util.h"
 
 struct _tcp_dgram {
-	struct iphdr ip;
-	struct tcphdr tcp;
+	struct iphdr 	ip;
+	struct tcphdr 	tcp;
 };
 
 struct _pseudo_header {
-	unsigned int source_address;
-	unsigned int dest_address;
-	unsigned char placeholder;
-	unsigned char protocol;
-	unsigned short tcp_length;
-	struct tcphdr tcp;
+	unsigned int 	source_address;
+	unsigned int 	dest_address;
+	unsigned char 	placeholder;
+	unsigned char 	protocol;
+	unsigned short 	tcp_length;
+	struct tcphdr 	tcp;
 };
 
-struct iphdr ip_prep() {
+struct iphdr prep_ip(uint32 src_addr, uint32 dst_addr) {
 	struct iphdr ip_hdr;
+
+	ip_hdr.ihl 		= IPHDR_LEN;
+	ip_hdr.version 	= IP_VER;
+	ip_hdr.tot_len 	= 0;
+	ip_hdr.id 		= htonl(0);
+	ip_hdr.ttl 		= TTL;
+	ip_hdr.protocol = IPPROTO_TCP;
+	ip_hdr.frag_off = 0;
+	ip_hdr.saddr 	= src_addr;
+	ip_hdr.daddr 	= dst_addr;
+	ip_hdr.check 	= 0;
 
 	return ip_hdr;
 }
 
-struct tcphdr tcp_prep() {
+struct tcphdr prep_tcp(int type) {
 	struct tcphdr tcp_hdr;
-
 	return tcp_hdr;
 }
 
-void _send(uint32 dest_addr, uint32 data, int chan) {
+void _send(uint32 src_addr, uint32 dest_addr, uint32 data, int chan) {
 	struct _tcp_dgram packet;
 	struct _pseudo_header pseudo_header;
 	struct sockaddr_in sin;
@@ -72,5 +81,8 @@ void _send(uint32 dest_addr, uint32 data, int chan) {
 		error("_send(): Kernel won't allow IP header override.");
 
 	memset(&packet, 0, sizeof(packet));
+
+	packet.ip = prep_ip(src_addr, dest_addr);
+	packet.tcp = prep_tcp(chan);
 }
 

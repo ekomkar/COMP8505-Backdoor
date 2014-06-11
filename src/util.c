@@ -5,11 +5,16 @@
  *      Author: root
  */
 
+#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 #include <sys/time.h>
 #include <openssl/des.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
 
 #include "util.h"
 

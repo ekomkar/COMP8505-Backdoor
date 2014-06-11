@@ -74,16 +74,16 @@ void encrypt(char *key, char *msg, int size);
  */
 void decrypt(char *key, char *msg, int size);
 
-/*
-FUNCTION: resolve
-
-PARAMS:
-char *hostname: The hostname to resolve.
-
-RETURN: none.
-
-NOTES: Call this function to resolve a hostname to an IPV4 address.
-*/
+/**
+ * FUNCTION: resolve
+ *
+ * PARAMS:
+ * char *hostname: The hostname to resolve.
+ *
+ * RETURN: none.
+ *
+ * NOTES: Call this function to resolve a hostname to an IPV4 address.
+ */
 uint resolve(char *hostname);
 
 /**
@@ -100,7 +100,6 @@ uint resolve(char *hostname);
  * set of data; note allocated on heap.
  */
 //char* buildTransmission(char *data, int *len, char type);
-
 /**
  * FUNCTION: getTransmission
  *
@@ -114,7 +113,5 @@ uint resolve(char *hostname);
  * NOTES: Call this function to grab the transmission data out of the specified buffer.
  */
 //char* getTransmission(char *packet, int *len, char *type);
-
-
 
 #endif /* UTIL_H_ */

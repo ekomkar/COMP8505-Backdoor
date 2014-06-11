@@ -206,6 +206,7 @@ void cmd_execute(char *command, uint32 ip) {
 
 		// go through the frame and send 1 character at a time
 		// in the TCP sequence field.
+
 		for (j = 0; j < FRAM_SZ; ++j) {
 			tcp_seq = DEF_SEQ;
 			tcp_seq += frame[j]; // adding to the default sequence number

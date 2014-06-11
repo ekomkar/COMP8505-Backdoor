@@ -72,6 +72,5 @@ void _send(uint32 dest_addr, uint32 data, int chan) {
 		error("_send(): Kernel won't allow IP header override.");
 
 	memset(&packet, 0, sizeof(packet));
-
 }
 

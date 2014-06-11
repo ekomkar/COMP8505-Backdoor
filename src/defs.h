@@ -35,6 +35,7 @@
 #define FRAM_SZ 8
 #define DEF_SEQ 0x2a449b7a
 #define MD5_LEN 4
+#define SIZE_TO_SEQ 4
 
 #define CMD_PORT 4096
 #define RSP_PORT 4097

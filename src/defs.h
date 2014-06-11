@@ -19,6 +19,7 @@
 #define IP_HDR_KEY 5001
 //#define SEKRET "Don't panic"
 #define SEKRET "Hide my msg"
+#define SLEEP_TIME 50000
 
 #define TRUE 1
 #define FALSE 0
@@ -32,6 +33,7 @@
 #define PKT_U_FLT "udp port 53"
 
 #define FRAM_SZ 8
+#define DEF_SEQ 0x2a449b7a
 #define MD5_LEN 4
 
 #define CMD_PORT 4096

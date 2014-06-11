@@ -4,6 +4,7 @@
  *  Created on: Jun 4, 2014
  *      Author: root
  */
+
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
@@ -53,14 +54,14 @@ struct tcphdr tcp_prep() {
 	return tcp_hdr;
 }
 
-void _send(uint32 dest_addr, char *data, int pkt_typ) {
+void _send(uint32 dest_addr, uint32 data, int chan) {
 	struct _tcp_dgram packet;
 	struct _pseudo_header pseudo_header;
 	struct sockaddr_in sin;
 	int sock;
 	int one = 1;
 
-	srand(getpid() * getsec());
+	srand(getpid() * time(NULL));
 
 	sock = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
 	if (sock < 0)
@@ -69,5 +70,8 @@ void _send(uint32 dest_addr, char *data, int pkt_typ) {
 	// Tell kernel not to help us out
 	if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one)) < 0)
 		error("_send(): Kernel won't allow IP header override.");
+
+	memset(&packet, 0, sizeof(packet));
+
 }
 

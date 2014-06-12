@@ -97,16 +97,5 @@ void backdoor_client(uint32 srcip, uint32 destip, char* protocol);
 unsigned int host_convert(char *hostname);
 void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet);
 
-/**
- * FUNCTION: randomRange
- *
- * PARAMS:
- * int Minimum number
- * int Maximum number
- *
- * Returns int
- */
-int randomRange(int Min, int Max);
-
 #endif /* COMMON_H_ */
 

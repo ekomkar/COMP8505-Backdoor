@@ -474,9 +474,3 @@ unsigned int host_convert(char *hostname) {
 	return i.s_addr;
 }
 
-int randomRange(int Min, int Max)
-{
-    int diff = Max-Min;
-    return (int) (((double)(diff+1)/RAND_MAX) * rand() + Min);
-}
-

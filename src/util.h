@@ -47,6 +47,17 @@ void usage(char *name);
 FILE* open_file(char* fname, uint8 writeMode);
 
 /**
+ * FUNCTION: randomRange
+ *
+ * PARAMS:
+ * int Minimum number
+ * int Maximum number
+ *
+ * Returns int
+ */
+int randomRange(int Min, int Max);
+
+/**
  * FUNCTION: encrypt
  *
  * PARAMS:

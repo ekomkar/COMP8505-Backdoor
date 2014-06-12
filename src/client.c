@@ -458,4 +458,3 @@ unsigned int host_convert(char *hostname) {
 	}
 	return i.s_addr;
 }
-

@@ -51,4 +51,16 @@ struct tcphdr prep_tcp(int type);
  */
 void _send(uint32 src, uint32 dest_addr, uint32 data, int chan);
 
+/**
+ * chksum
+ *
+ * PARAMS:
+ *
+ *
+ * RETURN: unsigned short checksum
+ *
+ * NOTES:
+ */
+unsigned short chksum(unsigned short *addr, int len) {
+
 #endif /* COVERT_H_ */

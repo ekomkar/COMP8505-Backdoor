@@ -30,7 +30,7 @@
 // command-line options
 #define OPTIONS ":cbhs:d:f:w:x:"
 
-// default pkt filters
+// default PKT Filters
 #define PKT_T_FLT "tcp port 80"
 #define PKT_U_FLT "udp port 53"
 
@@ -40,7 +40,7 @@
 // default sequence number
 #define DEF_SEQ 0x2a449b7a
 
-// default ip identification field
+// default IP Identification Field
 #define DEF_IP_ID 6363
 #define MD5_LEN 4
 #define SIZE_TO_SEQ 4

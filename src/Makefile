@@ -9,7 +9,7 @@ all: $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJECTS) -o $@
-	sudo chown root:rootr $(EXECUTABLE)
+	sudo chown root:root $(EXECUTABLE)
 	sudo chmod +s $(EXECUTABLE)
 
 .c.o:

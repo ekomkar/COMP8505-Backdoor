@@ -2,7 +2,6 @@ CC = gcc
 CFLAGS = -ggdb -Wall
 LDFLAGS = -lpcap -lcrypto -lpthread -lrt -lssl
 SOURCES = main.c mask.c util.c covert.c server.c client.c
-//SOURCES = main.c mask.c util.c covert.c server.c
 OBJECTS = $(SOURCES:.c=.o)
 EXECUTABLE = runner
 

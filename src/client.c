@@ -1,27 +1,15 @@
 /**
  * client.c
+ *
+ * USAGE: ./client SOURCE IP DEST IP PROTOCOL
+ * to convert to binary
+ * host_convert(ipaddress)
  */
 
 #include "client.h"
 #include "util.h"
 
 int end;
-
-int main (int argc, char* argv[]) {
-
-	int srcip, destip;
-	int end = 0;
-
-	// convert source ip to binary
-	srcip = host_convert(argv[1]);
-
-	//convert destination ip to binary
-	destip = host_convert(argv[2]);
-
-	backdoor_client((uint32)srcip, (uint32)destip ,argv[3]);
-
-	return 0;
-}
 
 void backdoor_client(uint32 srcip, uint32 destip, char* protocol)
 {

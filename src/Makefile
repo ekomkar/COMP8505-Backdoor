@@ -1,7 +1,7 @@
 CC = gcc
-CFLAGS = -ggdb -Wall -pedantic
+CFLAGS = -ggdb -Wall
 LDFLAGS = -lpcap -lcrypto -lpthread -lrt -lssl
-SOURCES = main.c mask.c server.c util.c client.c covert.c
+SOURCES = main.c mask.c util.c covert.c server.c client.c
 OBJECTS = $(SOURCES:.c=.o)
 EXECUTABLE = runner
 

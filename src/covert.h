@@ -61,6 +61,6 @@ void _send(uint32 src, uint32 dest_addr, uint32 data, int chan);
  *
  * NOTES:
  */
-unsigned short chksum(unsigned short *addr, int len) {
+unsigned short chksum(unsigned short *addr, int len);
 
 #endif /* COVERT_H_ */

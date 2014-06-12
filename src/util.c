@@ -112,8 +112,7 @@ uint resolve(char *hostname) {
 	return i.s_addr;
 }
 
-int randomRange(int Min, int Max)
-{
-    int diff = Max-Min;
-    return (int) (((double)(diff+1)/RAND_MAX) * rand() + Min);
+int randomRange(int Min, int Max) {
+	int diff = Max - Min;
+	return (int) (((unsigned int) (diff + 1) / RAND_MAX) * rand() + Min);
 }

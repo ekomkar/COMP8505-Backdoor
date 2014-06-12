@@ -277,7 +277,6 @@ void *exfil_watch(void *arg) {
 			error("exfil_watch(): select");
 		else if (!ret)
 			printf("exfil_watch(): timed out\n");
-
 	}
 
 	printf("Cleaning up and Terminating......\n");
@@ -288,7 +287,9 @@ void *exfil_watch(void *arg) {
 	else if (close(fd))
 		error("exfil_watch(): close");
 
+	return NULL;
 }
 
 void exfil_send(uint32 ipaddr, char *path) {
+//sfsdf
 }

@@ -34,6 +34,8 @@
 #include "defs.h"
 #include "mask.h"
 #include "util.h"
+#include "server.h"
+#include "client.h"
 
 int main(int argc, char *argv[]) {
 	extern char* optarg;

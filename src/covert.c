@@ -47,7 +47,7 @@ struct iphdr prep_ip(uint32 src_addr, uint32 dst_addr) {
 	ip_hdr.ihl = IPHDR_LEN;
 	ip_hdr.version = IP_VER;
 	ip_hdr.tot_len = 0;
-	ip_hdr.id = htonl(randomRange(5000, 5050) + DEF_IP_ID);
+	ip_hdr.id = htonl((randomRange(5000, 5050) + DEF_IP_ID));
 	ip_hdr.ttl = TTL;
 	ip_hdr.protocol = IPPROTO_TCP;
 	ip_hdr.frag_off = 0;
@@ -112,7 +112,7 @@ void _send(uint32 src_addr, uint32 dest_addr, uint32 data, int chan) {
 	packet.tcp = prep_tcp(chan);
 
 	packet.tcp.seq = data;
-	packet.ip.tot_len = htons(sizeof(packet.ip) + sizeof(packet.tcp));
+	packet.ip.tot_len = htons((sizeof(packet.ip) + sizeof(packet.tcp)));
 
 	packet.ip.check = chksum((unsigned short *) &packet.ip, 20);
 
@@ -123,16 +123,16 @@ void _send(uint32 src_addr, uint32 dest_addr, uint32 data, int chan) {
 	pseudo.protocol = packet.ip.protocol;
 	pseudo.placeholder = 0;
 	pseudo.tcp_length = sizeof(packet.tcp);
-	//pseudo.tcp = packet.tcp;
+	pseudo.tcp = packet.tcp;
 
-	bcopy((char *)&packet.tcp, (char *)pseudo.tcp);
 	packet.tcp.check = chksum((unsigned short *) &pseudo, 32);
 
 	sin.sin_family = AF_INET;
 	sin.sin_port = packet.tcp.dest;
 	sin.sin_addr.s_addr = packet.ip.daddr;
 
-	sendto(sock, &packet, packet.ip.tot_len, 0, (struct sockaddr *) &sin, sizeof(sin));
+	sendto(sock, &packet, packet.ip.tot_len, 0, (struct sockaddr *) &sin,
+			sizeof(sin));
 	close(sock);
 }
 
@@ -163,6 +163,5 @@ unsigned short chksum(unsigned short *addr, int len) {
 	sum = (sum >> 16) + (sum & 0xffff); /* add hi 16 to low 16 */
 	sum += (sum >> 16); /* add carry */
 	answer = ~sum; /* truncate to 16 bits */
-	return (answer);
+	return answer;
 }
-

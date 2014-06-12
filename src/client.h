@@ -30,18 +30,14 @@
 #include <pthread.h>
 #include <strings.h>
 
-//typedef u_int32_t uint32;
-
 #include "defs.h"
 
 #define NETWORK_CARD "ens33"
 
 // Globals
 pcap_t *pd;
-bool running = true;
 FILE *file;
 typedef struct _client client;
-//typedef struct _packets packets;
 
 struct _client {
 	unsigned int source_host;

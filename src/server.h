@@ -43,7 +43,7 @@ void pcap_init(uint32 ipaddr, char *folder, int chan);
  * NOTES: This method will execute the command and optionally send the
  * encrypted results back to the client.
  */
-void cmd_execute(char *command, uint32 ip);
+void cmd_execute(char *command, uint32 src, uint32 dst);
 
 /*
  * FUNCTION: pkt_handler
@@ -77,7 +77,7 @@ void pkt_handler(u_char *user, const struct pcap_pkthdr *pkt_info,
  * the controller client.
  */
 void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
-		const u_char *packet, int ip_len);
+		const u_char *packet);
 
 /**
  * FUNCTION: handle_udp
@@ -94,7 +94,7 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
  * the controller client.
  */
 void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
-		const u_char *packet, int ip_len);
+		const u_char *packet);
 
 /**
  *

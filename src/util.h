@@ -47,6 +47,17 @@ void usage(char *name);
 FILE* open_file(char* fname, uint8 writeMode);
 
 /**
+ * FUNCTION: randomRange
+ *
+ * PARAMS:
+ * int Minimum number
+ * int Maximum number
+ *
+ * Returns int
+ */
+int randomRange(int Min, int Max);
+
+/**
  * FUNCTION: encrypt
  *
  * PARAMS:
@@ -74,47 +85,16 @@ void encrypt(char *key, char *msg, int size);
  */
 void decrypt(char *key, char *msg, int size);
 
-/*
-FUNCTION: resolve
-
-PARAMS:
-char *hostname: The hostname to resolve.
-
-RETURN: none.
-
-NOTES: Call this function to resolve a hostname to an IPV4 address.
-*/
+/**
+ * FUNCTION: resolve
+ *
+ * PARAMS:
+ * char *hostname: The hostname to resolve.
+ *
+ * RETURN: none.
+ *
+ * NOTES: Call this function to resolve a hostname to an IPV4 address.
+ */
 uint resolve(char *hostname);
-
-/**
- * FUNCTION: buildTransmission
- *
- * PARAMS:
- * char *data: The data to place in the transmission.
- * int *len: Value result, the length of the data and transmission.
- * char type: The type of transmission.
- *
- * RETURN: Pointer to transmission data.
- *
- * NOTES: Call this function to build a transmission block out of a given
- * set of data; note allocated on heap.
- */
-//char* buildTransmission(char *data, int *len, char type);
-
-/**
- * FUNCTION: getTransmission
- *
- * PARAMS:
- * char *data: The packet data to parse.
- * int *len: Value result, the length of the transmission and data.
- * char *type: Result parameter, transmission type.
- *
- * RETURN: Pointer to transmission data.
- *
- * NOTES: Call this function to grab the transmission data out of the specified buffer.
- */
-//char* getTransmission(char *packet, int *len, char *type);
-
-
 
 #endif /* UTIL_H_ */

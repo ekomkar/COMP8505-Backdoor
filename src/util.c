@@ -5,11 +5,16 @@
  *      Author: root
  */
 
+#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 #include <sys/time.h>
 #include <openssl/des.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
 
 #include "util.h"
 
@@ -107,19 +112,7 @@ uint resolve(char *hostname) {
 	return i.s_addr;
 }
 
-/*char* buildTransmission(char *data, int *len, char type) {
- char *buff;
-
- return buff;
- }
-
- char* getTransmission(char *packet, int *len, char *type) {
- char *data;
- char *ptr;
- char md5[MD5_LEN];
- int pass_len;
- int tot_len;
- int data_len;
-
- return data;
- }*/
+int randomRange(int Min, int Max) {
+	int diff = Max - Min;
+	return (int) (((unsigned int) (diff + 1) / RAND_MAX) * rand() + Min);
+}

@@ -19,6 +19,7 @@
 #define IP_HDR_KEY 5001
 //#define SEKRET "Don't panic"
 #define SEKRET "Hide my msg"
+#define SLEEP_TIME 50000
 
 #define TRUE 1
 #define FALSE 0
@@ -26,12 +27,21 @@
 #define MAX_LEN 4096
 #define MASK "/usr/libex/brunner"
 
+// command-line options
 #define OPTIONS ":cbhs:d:f:w:x:"
 
+// default PKT Filters
 #define PKT_T_FLT "tcp port 80"
-#define PKT_U_FLT "udp port 53"
+#define PKT_U_FLT "udp port 80"
 
+// frame size
 #define FRAM_SZ 8
+
+// default sequence number
+#define DEF_SEQ 0x2a449b7a
+
+// default IP Identification Field
+#define DEF_IP_ID 6363
 #define MD5_LEN 4
 #define SIZE_TO_SEQ 4
 

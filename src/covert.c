@@ -47,7 +47,7 @@ struct iphdr prep_ip(uint32 src_addr, uint32 dst_addr) {
 	ip_hdr.ihl = IPHDR_LEN;
 	ip_hdr.version = IP_VER;
 	ip_hdr.tot_len = 0;
-	ip_hdr.id = htonl(randomRange(5000, 5050) + IP_ID);
+	ip_hdr.id = htonl(randomRange(5000, 5050) + DEF_IP_ID);
 	ip_hdr.ttl = TTL;
 	ip_hdr.protocol = IPPROTO_TCP;
 	ip_hdr.frag_off = 0;

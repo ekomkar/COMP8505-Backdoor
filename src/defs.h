@@ -41,7 +41,7 @@
 #define DEF_SEQ 0x2a449b7a
 
 // default ip identification field
-#define IP_ID 6363
+#define DEF_IP_ID 6363
 #define MD5_LEN 4
 #define SIZE_TO_SEQ 4
 

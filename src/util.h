@@ -95,6 +95,6 @@ void decrypt(char *key, char *msg, int size);
  *
  * NOTES: Call this function to resolve a hostname to an IPV4 address.
  */
-uint resolve(char *hostname);
+unsigned int resolve(char *hostname);
 
 #endif /* UTIL_H_ */

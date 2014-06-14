@@ -21,11 +21,13 @@
 #define SEKRET "Hide my msg"
 #define SLEEP_TIME 50000
 
+#define NET_DEVICE "wlp2s0"
+
 #define TRUE 1
 #define FALSE 0
 
 #define MAX_LEN 4096
-#define MASK "/usr/libex/brunner"
+#define MASK "JBRunner/1.0"
 
 // command-line options
 #define OPTIONS ":cbhs:d:f:w:x:"
@@ -55,6 +57,7 @@
 #define XFL_TYP 2
 #define DIR_TYP 3
 
+#define IP_HDR_SIZ 20
 #define TCP_HDR_SIZ 20
 #define UDP_HDR_SIZ 8
 

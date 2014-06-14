@@ -15,6 +15,9 @@
 #include <openssl/des.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <time.h>
 
 #include "util.h"
 
@@ -95,7 +98,7 @@ void decrypt(char *key, char *msg, int size) {
 	free(result);
 }
 
-uint resolve(char *hostname) {
+unsigned int resolve(char *hostname) {
 	static struct in_addr i;
 	struct hostent *h;
 
@@ -104,9 +107,10 @@ uint resolve(char *hostname) {
 		h = gethostbyname(hostname);
 
 		if (h == NULL)
+			fprintf(stderr, "cannot resolve %s\n", hostname);
 			return 0;
 
-		memcpy(h->h_addr, &i.s_addr, h->h_length);
+		bcopy(h->h_addr, (char *) &i.s_addr, h->h_length);
 	}
 
 	return i.s_addr;
@@ -114,5 +118,6 @@ uint resolve(char *hostname) {
 
 int randomRange(int Min, int Max) {
 	int diff = Max - Min;
+	srand(getpid() * time(NULL));
 	return (int) (((unsigned int) (diff + 1) / RAND_MAX) * rand() + Min);
 }

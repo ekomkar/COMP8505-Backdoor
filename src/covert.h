@@ -49,7 +49,7 @@ struct tcphdr prep_tcp(int type);
  *
  * NOTES:
  */
-void _send(uint32 src, uint32 dest_addr, uint32 data, int chan);
+void _send(uint32 src, uint32 dest_addr, char data, int chan);
 
 /**
  * chksum

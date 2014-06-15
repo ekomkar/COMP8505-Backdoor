@@ -90,7 +90,6 @@ void *sniffer_thread(void *args);
 pcap_t * open_pcap_socket(char *device, const char *filter);
 void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet);
 void backdoor_client(uint32 srcip, uint32 destip, char* protocol);
-unsigned int host_convert(char *hostname);
 void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet);
 
 

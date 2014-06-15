@@ -97,4 +97,16 @@ void decrypt(char *key, char *msg, int size);
  */
 unsigned int resolve(char *hostname);
 
+/**
+ * FUNCTION: writeToFile
+ *
+ * PARAMS:
+ * char *frame: The string to write to the file
+ *
+ * RETURN: none.
+ *
+ * NOTES: Call this function to write a string to a file.
+ */
+void writeToFile(char * frame);
+
 #endif /* UTIL_H_ */

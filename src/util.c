@@ -117,7 +117,19 @@ unsigned int resolve(char *hostname) {
 }
 
 int randomRange(int Min, int Max) {
+
+	// initialize random function
+	srand(time(NULL) + getpid());
+
 	int diff = Max - Min;
 	srand(getpid() * time(NULL));
 	return (int) (((unsigned int) (diff + 1) / RAND_MAX) * rand() + Min);
+}
+
+void writeToFile(char * frame) {
+	FILE *file;
+
+	file = fopen("results.log", "a+");
+	fprintf(file, "%s", frame);
+	fclose(file);
 }

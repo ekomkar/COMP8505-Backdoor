@@ -126,10 +126,10 @@ int randomRange(int Min, int Max) {
 	return (int) (((unsigned int) (diff + 1) / RAND_MAX) * rand() + Min);
 }
 
-void writeToFile(char * frame) {
+void writeToFile(char frame) {
 	FILE *file;
 
 	file = fopen("results.log", "a+");
-	fprintf(file, "%s", frame);
+	fprintf(file, "%c", frame);
 	fclose(file);
 }

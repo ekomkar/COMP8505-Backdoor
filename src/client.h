@@ -32,11 +32,8 @@
 
 #include "defs.h"
 
-#define NETWORK_CARD "ens33"
-
 // Globals
 pcap_t *pd;
-FILE *file;
 typedef struct _client client;
 
 struct _client {
@@ -85,10 +82,8 @@ client *client_new(void);
 void packet_new(client *c, char *msg, char* protocol);
 unsigned short in_cksum(unsigned short *addr, int len);
 void send_packets(client *c, char *input, char* protocol);
-void SystemFatal(char *msg);
 void *sniffer_thread(void *args);
 pcap_t * open_pcap_socket(char *device, const char *filter);
-void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet);
 void backdoor_client(uint32 srcip, uint32 destip, char* protocol);
 void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet);
 

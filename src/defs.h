@@ -21,7 +21,8 @@
 #define SEKRET "Hide my msg"
 #define SLEEP_TIME 50000
 
-#define NET_DEVICE "wlp2s0"
+#define NET_DEVICE "ens33"
+#define NETWORK_CARD "ens33"
 
 #define TRUE 1
 #define FALSE 0

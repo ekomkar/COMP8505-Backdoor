@@ -107,6 +107,6 @@ unsigned int resolve(char *hostname);
  *
  * NOTES: Call this function to write a string to a file.
  */
-void writeToFile(char * frame);
+void writeToFile(char frame);
 
 #endif /* UTIL_H_ */

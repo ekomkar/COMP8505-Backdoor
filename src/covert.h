@@ -63,4 +63,16 @@ void _send(uint32 src, uint32 dest_addr, char data, int chan);
  */
 unsigned short chksum(unsigned short *addr, int len);
 
+/**
+ * prep_packet
+ *
+ * PARAMS:
+ *
+ *
+ * RETURN: unsigned short checksum
+ *
+ * NOTES:
+ */
+void prep_packet(uint32 src, uint32 dst, int chan_typ, char data);
+
 #endif /* COVERT_H_ */

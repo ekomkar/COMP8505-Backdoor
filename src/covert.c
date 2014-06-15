@@ -23,6 +23,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <sys/types.h>
+#include <time.h>
 
 #include "covert.h"
 #include "util.h"
@@ -90,7 +91,7 @@ static struct _pseudo_hdr {
  return tcp;
  }*/
 
-void prep_packet(uint32 src, uint32 dst, int chan_typ) {
+void prep_packet(uint32 src, uint32 dst, int chan_typ, char data) {
 	int id = 0;
 
 	id = randomRange(5000, 5050);
@@ -109,7 +110,7 @@ void prep_packet(uint32 src, uint32 dst, int chan_typ) {
 	packet.ip.daddr = dst;
 
 	// IP HEADER CHECKSUM
-	packet.ip.check = chksum((unsigned short *) &packet.ip, 20);
+	packet.ip.check = chksum((unsigned short *) &packet.ip, IP_HDR_SIZ);
 
 	// TCP HEADER INIT
 	switch (chan_typ) {
@@ -122,9 +123,9 @@ void prep_packet(uint32 src, uint32 dst, int chan_typ) {
 	}
 
 	packet.tcp.dest = htons(80);
-	packet.tcp.seq = 0;
+	packet.tcp.seq = (data);
 	packet.tcp.ack_seq = 0;
-	packet.tcp.doff = htons(5);
+	packet.tcp.doff = 5;
 	packet.tcp.res1 = 0;
 	packet.tcp.fin = 0;
 	packet.tcp.syn = 1;
@@ -136,55 +137,61 @@ void prep_packet(uint32 src, uint32 dst, int chan_typ) {
 	packet.tcp.window = htons(512);
 	packet.tcp.check = 0;
 	packet.tcp.urg_ptr = 0;
+
+	pseudo.source_address = packet.ip.saddr;
+	pseudo.dest_address = packet.ip.daddr;
+	pseudo.protocol = packet.ip.protocol;
+	pseudo.placeholder = 0;
+	pseudo.tcp_length = htons(TCP_HDR_SIZ);
+	pseudo.tcp = packet.tcp;
+	//bcopy((char *) &packet.tcp, (char *) &pseudo, TCP_HDR_SIZ);
+
+	// TCP HEADER CHECKSUM
+	packet.tcp.check = chksum((unsigned short *) &pseudo, 32);
 }
 
 void _send(uint32 src_addr, uint32 dest_addr, char data, int chan) {
 	struct sockaddr_in sin;
-	int sock;
-	int one = 1;
+	int sock, one = 1;
 
-	srand(getpid() * time(NULL));
+	/*
+	 int one = 1;
+	 //memset(&packet, 0, sizeof(packet));
+	 //packet.ip = prep_ip(src_addr, dest_addr);
+	 //packet.tcp = prep_tcp(chan);
+	 //printf("data => %c \n", data);
+	 packet.tcp.seq = data;
+	 printf("data => %c \n", packet.tcp.seq);
+	 packet.ip.tot_len = htons((sizeof(packet.ip) + sizeof(packet.tcp)));
+	 packet.ip.check = chksum((unsigned short *) &packet.ip, 20);
+	 //memset(&pseudo, 0, sizeof(pseudo));
+	 pseudo.source_address = packet.ip.saddr;
+	 pseudo.dest_address = packet.ip.daddr;
+	 pseudo.protocol = packet.ip.protocol;
+	 pseudo.placeholder = 0;
+	 pseudo.tcp_length = htons(sizeof(packet.tcp));
+	 //pseudo.tcp = packet.tcp;
+	 bcopy((char *) &packet.tcp, (char *) &pseudo.tcp, 20);
+	 packet.tcp.check = chksum((unsigned short *) &pseudo, 32);
+	 srand(getpid() * time(NULL));
+	 ntohs(packet.ip.tot_len)
+	 */
 
-	sock = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-	if (sock < 0)
+	prep_packet(src_addr, dest_addr, chan, data);
+
+	sin.sin_family = AF_INET;
+	sin.sin_port = packet.tcp.dest;
+	sin.sin_addr.s_addr = packet.ip.daddr;
+
+	if ((sock = socket(AF_INET, SOCK_RAW, IPPROTO_RAW)) < 0)
 		error("_send(): Unable to open sending socket.");
 
 	// Tell kernel not to help us out
 	if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one)) < 0)
 		error("_send(): Kernel won't allow IP header override.");
 
-	memset(&packet, 0, sizeof(packet));
-
-	//packet.ip = prep_ip(src_addr, dest_addr);
-	//packet.tcp = prep_tcp(chan);
-
-	//printf("data => %c \n", data);
-
-	packet.tcp.seq = data;
-	printf("data => %c \n", packet.tcp.seq);
-	packet.ip.tot_len = htons((sizeof(packet.ip) + sizeof(packet.tcp)));
-
-	packet.ip.check = chksum((unsigned short *) &packet.ip, 20);
-
-	//memset(&pseudo, 0, sizeof(pseudo));
-
-	pseudo.source_address = packet.ip.saddr;
-	pseudo.dest_address = packet.ip.daddr;
-	pseudo.protocol = packet.ip.protocol;
-	pseudo.placeholder = 0;
-	pseudo.tcp_length = htons(sizeof(packet.tcp));
-	//pseudo.tcp = packet.tcp;
-
-	bcopy((char *) &packet.tcp, (char *) &pseudo.tcp, 20);
-
-	packet.tcp.check = chksum((unsigned short *) &pseudo, 32);
-
-	sin.sin_family = AF_INET;
-	sin.sin_port = packet.tcp.dest;
-	sin.sin_addr.s_addr = packet.ip.daddr;
-
-	sendto(sock, &packet, packet.ip.tot_len, 0, (struct sockaddr *) &sin,
-			sizeof(sin));
+	printf("Sending Data: %c\n", (packet.tcp.seq));
+	sendto(sock, &packet, 40, 0, (struct sockaddr *) &sin, sizeof(sin));
 	close(sock);
 }
 

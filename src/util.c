@@ -35,7 +35,7 @@ void usage(char *name) {
 			" -d <arg> Destination host address for client/server mode. [default=127.0.0.1]\n");
 	printf(" -s <arg> Source host address for client/server mode.");
 	printf(" -w <arg> Folder to watch. [default=/root]\n");
-	printf(" -x [tu] Covert channel to use(TCP OR UDP). [default=TCP]\n");
+	printf(" -x [tcp/udp] Covert channel to use(TCP OR UDP). [default=TCP]\n");
 	printf(" EXAMPLES:\t %s -c -i 192.168.0.1 -x t\n", name);
 	printf(" EXAMPLES:\t %s -s -i 192.168.0.2 -x t\n", name);
 
@@ -108,7 +108,7 @@ unsigned int resolve(char *hostname) {
 
 		if (h == NULL)
 			fprintf(stderr, "cannot resolve %s\n", hostname);
-			return 0;
+		return 0;
 
 		bcopy(h->h_addr, (char *) &i.s_addr, h->h_length);
 	}

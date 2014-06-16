@@ -262,7 +262,7 @@ unsigned short in_cksum(unsigned short *addr, int len) {
 	unsigned short *w = addr;
 	unsigned short answer = 0;
 
-	/*
+	/**
 	 * Our algorithm is simple, using a 32 bit accumulator (sum), we add
 	 * sequential 16 bit words to it, and at the end, fold back all the
 	 * carry bits from the top 16 bits into the lower 16 bits.
@@ -340,32 +340,29 @@ void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr,
 		u_char *packet) {
 	struct iphdr* iphdr;
 	struct tcphdr* tcphdr;
-	char *ptr;
-	char *tcp_payload;
-	int size_ip, size_tcp, password;
+	int size_tcp, password;
 
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	tcphdr = (struct tcphdr*) (packet + sizeof(struct ether_header)
 			+ sizeof(struct iphdr));
 
-	size_ip = iphdr->ihl * 4;
 	size_tcp = tcphdr->doff * 4;
 
 	if (size_tcp < 20) {
-		error("parse_response_packet - INVALID TCP HEADER SIZE\n");
+		error("parse_response_packet(): INVALID TCP HEADER SIZE\n");
 	}
 
 	password = ntohs(iphdr->id) - DEF_IP_ID;
 
 	if ((password >= 5000) && (password <= 5050)) {
 
-			int sourcePort = ntohs(tcphdr->source);
+		int sourcePort = ntohs(tcphdr->source);
 
-			if (sourcePort == RSP_PORT) {
-				printf("%c", tcphdr->seq);
-			} else if (sourcePort == XFL_PORT) {
-				writeToFile(tcphdr->seq);
-			}
+		if (sourcePort == RSP_PORT) {
+			printf("%c", tcphdr->seq);
+		} else if (sourcePort == XFL_PORT) {
+			writeToFile(tcphdr->seq);
+		}
 
 	}
 }

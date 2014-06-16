@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 	char folder[MAX_LEN];
 	uint32 src_addr, dst_addr;
 
-	strcpy(channel, "tcp");
+	strncpy(channel, CHAN_TCP, strlen(CHAN_TCP));
 	strncpy(lclhost, DEF_SRC, MAX_LEN);
 	strncpy(rmthost, DEF_DST, MAX_LEN);
 	strncpy(folder, DEF_FOLDER, MAX_LEN);
@@ -76,10 +76,10 @@ int main(int argc, char *argv[]) {
 			break;
 		case 'x': // channel
 			if (tolower(optarg[0]) == 't') {
-				strcpy(channel, "tcp");
+				strncpy(channel, CHAN_TCP, strlen(CHAN_TCP));
 				chan = 1;
 			} else if (tolower(optarg[0]) == 'u') {
-				strcpy(channel, "udp");
+				strncpy(channel, CHAN_UDP, strlen(CHAN_UDP));
 				chan = 2;
 			}
 			break;

@@ -33,6 +33,8 @@
 #define DEF_FOLDER "/root/"
 #define DEF_SRC "192.168.0.17"
 #define DEF_DST "96.55.197.75"
+#define CHAN_TCP "tcp"
+#define CHAN_UDP "udp"
 
 // command-line options
 #define OPTIONS ":cbhs:d:w:x:"
@@ -51,9 +53,6 @@
 #define DEF_IP_ID 6363
 #define MD5_LEN 4
 #define SIZE_TO_SEQ 4
-
-#define CHAN_TCP "tcp";
-#define CHAN_UDP "udp";
 
 #define CMD_PORT 4096
 #define RSP_PORT 4097

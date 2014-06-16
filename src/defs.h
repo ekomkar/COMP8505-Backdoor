@@ -21,8 +21,8 @@
 #define SEKRET "Hide my msg"
 #define SLEEP_TIME 50000
 
-#define NET_DEVICE "wlp2s0"
-#define NETWORK_CARD "wlp2s0"
+#define NET_DEVICE "ens33"
+#define NETWORK_CARD "ens33"
 
 #define TRUE 1
 #define FALSE 0
@@ -31,8 +31,8 @@
 #define MASK "JBRunner/1.0"
 
 #define DEF_FOLDER "/root/"
-#define DEF_SRC "192.168.0.23"
-#define DEF_DST "192.168.0.22"
+#define DEF_SRC "209.87.60.70"
+#define DEF_DST "192.168.0.139"
 
 // command-line options
 #define OPTIONS ":cbhs:d:w:x:"

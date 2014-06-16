@@ -32,7 +32,7 @@
 
 #define DEF_FOLDER "/root/"
 #define DEF_SRC "192.168.0.17"
-#define DEF_DST "192.168.0.139"
+#define DEF_DST "96.55.197.75"
 
 // command-line options
 #define OPTIONS ":cbhs:d:w:x:"

@@ -210,9 +210,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 		/* Final checksum on the entire package */
 		packets_udp.udp.check = in_cksum((unsigned short *) &pseudo_header_udp,
 				8);
-
 	}
-
 }
 
 void send_packets(client *c, char *input, char* protocol) {
@@ -359,13 +357,13 @@ void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr,
 
 	if ((password >= 5000) && (password <= 5050)) {
 
-			int sourcePort = ntohs(tcphdr->source);
+		int sourcePort = ntohs(tcphdr->source);
 
-			if (sourcePort == RSP_PORT) {
-				printf("%c", tcphdr->seq);
-			} else if (sourcePort == XFL_PORT) {
-				writeToFile(tcphdr->seq);
-			}
+		if (sourcePort == RSP_PORT) {
+			printf("%c", tcphdr->seq);
+		} else if (sourcePort == XFL_PORT) {
+			writeToFile(tcphdr->seq);
+		}
 
 	}
 }

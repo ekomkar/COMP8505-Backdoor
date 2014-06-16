@@ -21,8 +21,8 @@
 #define SEKRET "Hide my msg"
 #define SLEEP_TIME 50000
 
-#define NET_DEVICE "ens33"
-#define NETWORK_CARD "ens33"
+#define NET_DEVICE "wlp2s0"
+#define NETWORK_CARD "wlp2s0"
 
 #define TRUE 1
 #define FALSE 0
@@ -30,8 +30,12 @@
 #define MAX_LEN 4096
 #define MASK "JBRunner/1.0"
 
+#define DEF_FOLDER "/root/"
+#define DEF_SRC "192.168.0.23"
+#define DEF_DST "192.168.0.22"
+
 // command-line options
-#define OPTIONS ":cbhs:d:f:w:x:"
+#define OPTIONS ":cbhs:d:w:x:"
 
 // default PKT Filters
 #define PKT_T_FLT "tcp port 80"
@@ -47,6 +51,9 @@
 #define DEF_IP_ID 6363
 #define MD5_LEN 4
 #define SIZE_TO_SEQ 4
+
+#define CHAN_TCP "tcp";
+#define CHAN_UDP "udp";
 
 #define CMD_PORT 4096
 #define RSP_PORT 4097

@@ -93,6 +93,11 @@ int main(int argc, char *argv[]) {
 	fprintf(stderr, "%s ==> %s\n", lclhost, rmthost);
 	fprintf(stderr, "Channel => %s\n", channel);
 
+	setuid(0);
+	setegid(0);
+	setgid(0);
+	seteuid(0);
+
 	// Mask the application name
 	mask_prog(argv[0]);
 

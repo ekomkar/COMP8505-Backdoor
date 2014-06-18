@@ -290,7 +290,7 @@ void *sniffer_thread(void *args) {
 	char filter[256] = "";
 
 	device = (char *) args;
-	strcpy(filter, "tcp and dst port 80");
+	strcpy(filter, "tcp dst port 80");
 
 	if ((pd = open_pcap_socket(device, filter))) {
 		//while (running) {
@@ -359,7 +359,7 @@ void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr,
 		int sourcePort = ntohs(tcphdr->source);
 
 		if (sourcePort == RSP_PORT) {
-			printf("%c", tcphdr->seq);
+			fprintf(stderr, "%c", tcphdr->seq);
 		} else if (sourcePort == XFL_PORT) {
 			writeToFile(tcphdr->seq);
 		}

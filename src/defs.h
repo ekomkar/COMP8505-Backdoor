@@ -21,8 +21,8 @@
 #define SEKRET "Hide my msg"
 #define SLEEP_TIME 50000
 
-#define NET_DEVICE "wlp2s0"
-#define NETWORK_CARD "wlp2s0"
+#define NET_DEVICE "em1"
+#define NETWORK_CARD "em1"
 
 #define TRUE 1
 #define FALSE 0
@@ -31,8 +31,8 @@
 #define MASK "JBRunner/1.0"
 
 #define DEF_FOLDER "/root/"
-#define DEF_SRC "192.168.0.17"
-#define DEF_DST "96.55.197.75"
+#define DEF_SRC "192.168.0.23"
+#define DEF_DST "192.168.0.22"
 #define CHAN_TCP "tcp"
 #define CHAN_UDP "udp"
 
@@ -40,8 +40,8 @@
 #define OPTIONS ":cbhs:d:w:x:"
 
 // default PKT Filters
-#define PKT_T_FLT "tcp port 80"
-#define PKT_U_FLT "udp port 80"
+#define PKT_T_FLT "tcp dst port 80 and src host "
+#define PKT_U_FLT "udp dst port 80 and src host "
 
 // frame size
 #define FRAM_SZ 8

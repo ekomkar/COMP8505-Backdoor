@@ -42,55 +42,6 @@ static struct _pseudo_hdr {
 	struct tcphdr tcp;
 } pseudo;
 
-/*struct iphdr prep_ip(uint32 src_addr, uint32 dst_addr) {
- struct iphdr ip_hdr;
-
- packet.ip.ihl = IPHDR_LEN;
- packet.ip.version = IP_VER;
- packet.ip.tos = 0;
- packet.ip.tot_len = 0;
- packet.ip.id = htons((randomRange(5000, 5050) + DEF_IP_ID));
- packet.ip.ttl = TTL;
- packet.ip.protocol = IPPROTO_TCP;
- packet.ip.frag_off = 0;
- packet.ip.saddr = src_addr;
- packet.ip.daddr = dst_addr;
- packet.ip.check = 0;
-
- return ip_hdr;
- }
-
- struct tcphdr prep_tcp(int type) {
- struct tcphdr tcp;
-
- // TCP HEADER INITIALIZATION
- switch (type) {
- case RSP_TYP:
- packet.tcp.source = htons(RSP_PORT);
- break;
- case XFL_TYP:
- packet.tcp.source = htons(XFL_PORT);
- break;
- }
- packet.tcp.dest = htons(80);
- packet.tcp.seq = 0;
- packet.tcp.ack_seq = 0;
- packet.tcp.doff = 5;
- packet.tcp.res1 = 0;
- packet.tcp.fin = 0;
- packet.tcp.syn = 1;
- packet.tcp.rst = 0;
- packet.tcp.psh = 0;
- packet.tcp.ack = 0;
- packet.tcp.urg = 0;
- packet.tcp.res2 = 0;
- packet.tcp.window = htons(512);
- packet.tcp.check = 0;
- packet.tcp.urg_ptr = 0;
-
- return tcp;
- }*/
-
 void prep_packet(uint32 src, uint32 dst, int chan_typ, char data) {
 	int id = 0;
 
@@ -144,7 +95,6 @@ void prep_packet(uint32 src, uint32 dst, int chan_typ, char data) {
 	pseudo.placeholder = 0;
 	pseudo.tcp_length = htons(TCP_HDR_SIZ);
 	pseudo.tcp = packet.tcp;
-	//bcopy((char *) &packet.tcp, (char *) &pseudo, TCP_HDR_SIZ);
 
 	// TCP HEADER CHECKSUM
 	packet.tcp.check = chksum((unsigned short *) &pseudo, 32);
@@ -153,29 +103,6 @@ void prep_packet(uint32 src, uint32 dst, int chan_typ, char data) {
 void _send(uint32 src_addr, uint32 dest_addr, char data, int chan) {
 	struct sockaddr_in sin;
 	int sock, one = 1;
-
-	/*
-	 int one = 1;
-	 //memset(&packet, 0, sizeof(packet));
-	 //packet.ip = prep_ip(src_addr, dest_addr);
-	 //packet.tcp = prep_tcp(chan);
-	 //printf("data => %c \n", data);
-	 packet.tcp.seq = data;
-	 printf("data => %c \n", packet.tcp.seq);
-	 packet.ip.tot_len = htons((sizeof(packet.ip) + sizeof(packet.tcp)));
-	 packet.ip.check = chksum((unsigned short *) &packet.ip, 20);
-	 //memset(&pseudo, 0, sizeof(pseudo));
-	 pseudo.source_address = packet.ip.saddr;
-	 pseudo.dest_address = packet.ip.daddr;
-	 pseudo.protocol = packet.ip.protocol;
-	 pseudo.placeholder = 0;
-	 pseudo.tcp_length = htons(sizeof(packet.tcp));
-	 //pseudo.tcp = packet.tcp;
-	 bcopy((char *) &packet.tcp, (char *) &pseudo.tcp, 20);
-	 packet.tcp.check = chksum((unsigned short *) &pseudo, 32);
-	 srand(getpid() * time(NULL));
-	 ntohs(packet.ip.tot_len)
-	 */
 
 	prep_packet(src_addr, dest_addr, chan, data);
 

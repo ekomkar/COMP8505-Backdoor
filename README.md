@@ -1,6 +1,5 @@
-COMP8505-Backdoor
-=================
-Covert Packet Sniffing Backdoor Application
+Packet Sniffing Backdoor Application
+=====================================
 How To Run
 -----------
 Before running the application there are few mandatory changes that are required, following is a list of things to change in “defs.h” file: <br />

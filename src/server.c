@@ -151,7 +151,6 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	ip_len = iphdr->ihl * 4;
 
-	//udphdr = (struct udphdr*) (iphdr + sizeof(struct ether_header) + ip_len);
 	size_udp = sizeof(struct udphdr);
 
 	if (size_udp < UDP_HDR_SIZ)

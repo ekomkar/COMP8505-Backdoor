@@ -42,8 +42,4 @@ $> ./runner -c -x udp
 ```
 At this point client is running and should prompt the user to enter the command.
 
-```
-NOTE: The client will display the results of command sent by the user on the Terminal itself
-and will write the contents of the modified files sent by the server in a file called result.log,
-created in the same directory as the executable. 
-```
+> NOTE: The client will display the results of command sent by the user on the Terminal itself and will write the contents of the modified files sent by the server in a file called result.log,created in the same directory as the executable. 

@@ -1,5 +1,7 @@
-Packet Sniffing Backdoor Application
-=====================================
+Packet Sniffing Backdoor
+=========================
+This application is implemented using C programming language using both protocols TCP and UDP. The protocol to use for communication with the backdoor server application will be chosen by the user in the client application. This application uses Berkeley Socket Library for creating Raw Sockets and Libpcap library for sniffing packets at the Network Card level, bypassing the stack entirely. 
+
 How To Run
 -----------
 Before running the application there are few mandatory changes that are required, following is a list of things to change in ***“defs.h”*** file: <br />

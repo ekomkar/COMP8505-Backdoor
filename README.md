@@ -37,6 +37,8 @@ $> ./runner -c
 An optional switch ``“-x <tcp / udp>”`` can be added to the command above in order to specify the protocol to use for communication [Default = tcp]. Run the command below, if you want to specify which protocol to use: 
 ```
 $> ./runner -c -x tcp
+OR
+$> ./runner -c -x udp
 ```
 At this point client is running and should prompt the user to enter the command.
 

@@ -2,8 +2,7 @@ Packet Sniffing Backdoor
 =========================
 This application is implemented using C programming language using both protocols TCP and UDP. The protocol to use for communication with the backdoor server application will be chosen by the user in the client application. This application uses Berkeley Socket Library for creating Raw Sockets and Libpcap library for sniffing packets at the Network Card level, bypassing the stack entirely. 
 
-How To Run
------------
+#How To Run
 Before running the application there are few mandatory changes that are required, following is a list of things to change in ***“defs.h”*** file: <br />
 - NET_DEVICE - Network interface card of the server *[Default = em1]*. <br />
 - NETWORK_CARD - Network interface card of the client machine *[Default = em1]*. <br />
@@ -12,7 +11,7 @@ Before running the application there are few mandatory changes that are required
 - DEF_DST - IP address of the remote machine, client IP address if running as a server, server IP address if running as client. <br />
 - SLEEP_TIME - sleep duration between the exfiltrate packets sent by the server. *[Default = 50000]*. <br />
 
-##Compile
+###Compile
 Once the above changes are done, we can compile the application using the provided *“Makefile”*. In order to compile enter the command below and press Enter:
 ```
 $> make clean
@@ -20,7 +19,7 @@ $> make
 ```
 Once the application is compiled properly, an executable called *“runner”* will be created.
 
-##Run Server / Backdoor
+###Run Server / Backdoor
 In order to run the application as a server/backdoor, run the command below:
 ```
 $> ./runner -b
@@ -30,7 +29,7 @@ An optional switch ``“-w /root/Documents/”`` can be added to the command abo
 $> ./runner -b -w /root/Documents/
 ```
 At this point the backdoor application should be running and should be watching the specified directory and the waiting to receive commands from the client.
-##Run Client
+###Run Client
 In order to run the application as a client, run the command below:
 ```
 $> ./runner -c

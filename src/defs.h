@@ -21,7 +21,7 @@
 #define SEKRET "Hide my msg"
 #define SLEEP_TIME 50000
 
-#define NET_DEVICE "wlp2s0"
+#define SVR_NET_DEVICE "wlp2s0"
 #define NETWORK_CARD "wlp2s0"
 
 #define TRUE 1
@@ -32,7 +32,7 @@
 
 #define DEF_FOLDER "/root/"
 #define DEF_SRC "192.168.0.17"
-#define DEF_DST "96.55.197.75"
+#define DEF_DST "192.168.0.5"
 #define CHAN_TCP "tcp"
 #define CHAN_UDP "udp"
 

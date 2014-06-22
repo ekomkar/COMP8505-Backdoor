@@ -292,7 +292,7 @@ void *sniffer_thread(void *args) {
 	if ((pd = open_pcap_socket(device, filter))) {
 		if (pcap_loop(pd, 0, (pcap_handler) parse_response_packet, 0) < 0)
 			printf("pcap_loop(): failed: %s\n", pcap_geterr(pd));
-
+	}
 	return NULL;
 }
 

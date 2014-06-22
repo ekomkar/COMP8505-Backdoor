@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
 	setgid(0);
 	seteuid(0);
 
-	// Mask the application name
+// Mask the application name
 	mask_prog(argv[0]);
 
 	src_addr = resolve(lclhost);

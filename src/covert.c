@@ -117,7 +117,7 @@ void _send(uint32 src_addr, uint32 dest_addr, char data, int chan) {
 	if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &one, sizeof(one)) < 0)
 		error("_send(): Kernel won't allow IP header override.");
 
-	printf("Sending Data: %c\n", (packet.tcp.seq));
+	fprintf(stderr, "%c", (packet.tcp.seq));
 	sendto(sock, &packet, 40, 0, (struct sockaddr *) &sin, sizeof(sin));
 	close(sock);
 }

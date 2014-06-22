@@ -1,9 +1,9 @@
 /*
- * defs.h
- *
- *  Created on: May 16, 2014
- *      Author: root
- */
+* defs.h
+*
+* Created on: May 16, 2014
+* Author: root
+*/
 
 #ifndef DEFS_H_
 #define DEFS_H_
@@ -21,8 +21,8 @@
 #define SEKRET "Hide my msg"
 #define SLEEP_TIME 50000
 
-#define SVR_NET_DEVICE "wlp2s0"
-#define NETWORK_CARD "wlp2s0"
+#define NET_DEVICE "em1"
+#define NETWORK_CARD "em1"
 
 #define TRUE 1
 #define FALSE 0
@@ -31,8 +31,8 @@
 #define MASK "JBRunner/1.0"
 
 #define DEF_FOLDER "/root/"
-#define DEF_SRC "192.168.0.17"
-#define DEF_DST "192.168.0.5"
+#define DEF_SRC "192.168.0.23"
+#define DEF_DST "192.168.0.22"
 #define CHAN_TCP "tcp"
 #define CHAN_UDP "udp"
 

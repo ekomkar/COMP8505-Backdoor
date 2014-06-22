@@ -62,6 +62,12 @@ int main(int argc, char *argv[]) {
 		case 'b': // server?
 			client = false;
 			break;
+		case 's': // local host
+			strncpy(lclhost, optarg, MAX_LEN);
+			break;
+		case 'd': // remote host
+			strncpy(rmthost, optarg, MAX_LEN);
+			break;
 		case 'w': // file watch
 			strncpy(folder, optarg, MAX_LEN);
 			break;

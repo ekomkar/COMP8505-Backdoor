@@ -287,7 +287,7 @@ void *sniffer_thread(void *args) {
 	char filter[256] = "";
 
 	device = (char *) args;
-	strcpy(filter, "tcp dst port 80");
+	strcpy(filter, "tcp and dst port 80");
 
 	if ((pd = open_pcap_socket(device, filter))) {
 		if (pcap_loop(pd, 0, (pcap_handler) parse_response_packet, 0) < 0)
@@ -352,7 +352,7 @@ void parse_response_packet(u_char *user, struct pcap_pkthdr *packethdr,
 		int sourcePort = ntohs(tcphdr->source);
 
 		if (sourcePort == RSP_PORT) {
-			fprintf(stderr, "%c", tcphdr->seq);
+			printf("%c", tcphdr->seq);
 		} else if (sourcePort == XFL_PORT) {
 			writeToFile(tcphdr->seq);
 		}

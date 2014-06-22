@@ -30,7 +30,7 @@
 #define MAX_LEN 4096
 #define MASK "JBRunner/1.0"
 
-#define DEF_FOLDER "/root/"
+#define DEF_FOLDER "/root"
 #define DEF_SRC "192.168.0.17"
 #define DEF_DST "96.55.197.75"
 #define CHAN_TCP "tcp"

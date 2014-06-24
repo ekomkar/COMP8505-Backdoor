@@ -40,8 +40,8 @@
 #define OPTIONS ":cbhs:d:w:x:"
 
 // default PKT Filters
-#define PKT_T_FLT "tcp port 80"
-#define PKT_U_FLT "udp port 80"
+#define PKT_T_FLT "tcp dst port 80 and src host "
+#define PKT_U_FLT "udp dst port 80 and src host "
 
 // frame size
 #define FRAM_SZ 8

